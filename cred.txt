@@ -1,0 +1,5 @@
+host: db.cyjunbcqbkuomqqvnxjo.supabase.co
+port: 5432
+database: postgres
+user: postgres
+password: p4ud4lm4rj4n

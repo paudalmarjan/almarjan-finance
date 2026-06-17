@@ -10,8 +10,9 @@ RUN apt-get update && apt-get install -y \
     git \
     libzip-dev \
     libpq-dev \
+    libsqlite3-dev \
     && docker-php-ext-configure gd --with-freetype --with-jpeg \
-    && docker-php-ext-install gd zip pdo pdo_pgsql
+    && docker-php-ext-install gd zip pdo pdo_pgsql pdo_sqlite
 
 # Aktifkan mod_rewrite Apache untuk routing Laravel
 RUN a2enmod rewrite
@@ -31,8 +32,9 @@ COPY . .
 COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
 RUN composer install --no-dev --optimize-autoloader
 
-# Atur permissions folder storage & bootstrap cache
-RUN chown -R www-data:www-data /var/www/html/storage /var/www/html/bootstrap/cache
+# Buat file SQLite jika belum ada dan atur permissions
+RUN touch database/database.sqlite
+RUN chown -R www-data:www-data /var/www/html/storage /var/www/html/bootstrap/cache /var/www/html/database
 
 # Port default Apache
 EXPOSE 80
