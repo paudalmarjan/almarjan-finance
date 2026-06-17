@@ -1,0 +1,14 @@
+.git
+.github
+.env
+.env.*
+node_modules
+vendor
+public/storage
+database/database.sqlite
+tests
+*.log
+.DS_Store
+.phpunit.result.cache
+.vscode
+.idea
