@@ -17,35 +17,21 @@ class RegisteredUserController extends Controller
 {
     /**
      * Display the registration view.
+     * Disabled: Registration is managed by admin via Settings page.
      */
-    public function create(): View
+    public function create(): RedirectResponse
     {
-        return view('auth.register');
+        return redirect()->route('login')->with('error', 'Pendaftaran akun baru tidak tersedia. Hubungi admin untuk mendapatkan akses.');
     }
 
     /**
      * Handle an incoming registration request.
+     * Disabled: Registration is managed by admin via Settings page.
      *
      * @throws ValidationException
      */
     public function store(Request $request): RedirectResponse
     {
-        $request->validate([
-            'name' => ['required', 'string', 'max:255'],
-            'email' => ['required', 'string', 'lowercase', 'email', 'max:255', 'unique:'.User::class],
-            'password' => ['required', 'confirmed', Rules\Password::defaults()],
-        ]);
-
-        $user = User::create([
-            'name' => $request->name,
-            'email' => $request->email,
-            'password' => Hash::make($request->password),
-        ]);
-
-        event(new Registered($user));
-
-        Auth::login($user);
-
-        return redirect(route('dashboard', absolute: false));
+        abort(403, 'Pendaftaran akun baru tidak diizinkan. Akun hanya dapat dibuat oleh admin sistem.');
     }
 }

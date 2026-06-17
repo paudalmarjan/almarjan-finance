@@ -16,9 +16,20 @@
 /public/build
 /public/hot
 /public/storage
+/public/uploads
 /storage/*.key
 /storage/pail
 /vendor
 Homestead.json
 Homestead.yaml
 Thumbs.db
+
+# Sensitive files - jangan pernah dicommit
+cred.txt
+config.yml
+*.exe
+*.bin
+*.pem
+*.key
+sqlite_export.sql
+export_to_postgres.php
