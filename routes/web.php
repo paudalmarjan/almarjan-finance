@@ -91,4 +91,13 @@ Route::middleware(['auth', 'verified'])->group(function () {
     });
 });
 
+Route::get('/run-migrations', function () {
+    try {
+        \Illuminate\Support\Facades\Artisan::call('migrate', ['--force' => true]);
+        return "Migrasi berhasil dijalankan!<br><pre>" . \Illuminate\Support\Facades\Artisan::output() . "</pre>";
+    } catch (\Exception $e) {
+        return "Gagal migrasi: " . $e->getMessage();
+    }
+});
+
 require __DIR__.'/auth.php';
