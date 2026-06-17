@@ -1,59 +1,99 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
+# Sistem Manajemen Keuangan PAUD Al-Marjan
 
-<p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
+Aplikasi berbasis web sederhana untuk mengelola pencatatan keuangan (penerimaan SPP bulanan, biaya tahunan, pengeluaran kas operasional, administrasi siswa, dan ekspor berkas LPJ) di PAUD Al-Marjan.
 
-## About Laravel
+Aplikasi ini dibangun menggunakan **Laravel** (Backend), **Bootstrap 5 & Vanilla CSS** (Frontend), serta **Tom Select & AlpineJS** (Peningkatan UI/UX).
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+---
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+## Fitur Utama
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+1. **Penerimaan & SPP Bulanan**:
+   * Pencatatan pembayaran SPP bulanan (terkonsolidasi SPP + Komite).
+   * Fitur **Alokasi Pembayaran Cepat (FIFO)** untuk mendistribusikan cicilan biaya tahunan siswa dari atas ke bawah secara otomatis.
+   * Pencarian siswa instan menggunakan fitur autocomplete pencarian.
 
-## Learning Laravel
+2. **Administrasi Data Siswa**:
+   * Filter lengkap berdasarkan **Jenjang (Level)**, **Kelompok Kelas**, dan **Tipe Pendaftaran (Siswa Baru / Siswa Lama)**.
+   * Mendukung pencatatan **Nama Panggilan (Nickname)** untuk mempermudah pencarian nama akrab siswa oleh guru.
+   * Fitur **Impor Massal data siswa via Excel** (disertai unduhan template resmi).
+   * Kustomisasi pengecualian tagihan tahunan siswa secara mandiri.
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework. You can also check out [Laravel Learn](https://laravel.com/learn), where you will be guided through building a modern Laravel application.
+3. **Pengeluaran Kas Sekolah**:
+   * Pencatatan pengeluaran kas operasional per kategori.
+   * Kewajiban menyertakan unggahan bukti fisik transaksi (foto/PDF kuitansi).
 
-If you don't feel like reading, [Laracasts](https://laracasts.com) can help. Laracasts contains thousands of video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
+4. **Laporan & LPJ**:
+   * Grafik tren arus kas masuk/keluar bulanan secara visual (ApexCharts).
+   * Laporan daftar siswa menunggak (tunggakan aktif) seketika.
+   * Fitur **Unduh LPJ** berupa ekspor rekap pengeluaran bulanan beserta arsip berkas bukti fisik (zip file).
 
-## Laravel Sponsors
+5. **Akses Cepat (UX)**:
+   * **Global Search (`Ctrl + K`)**: Buka popup pencarian dari halaman mana saja untuk langsung membayar tagihan atau mengedit profil siswa.
+   * **Badges Status Tunggakan**: Menampilkan status keuangan siswa secara visual langsung pada tabel daftar siswa (Lunas / nominal total tunggakan).
 
-We would like to extend our thanks to the following sponsors for funding Laravel development. If you are interested in becoming a sponsor, please visit the [Laravel Partners program](https://partners.laravel.com).
+---
 
-### Premium Partners
+## Cara Menjalankan Aplikasi di Komputer Lokal
 
-- **[Vehikl](https://vehikl.com)**
-- **[Tighten Co.](https://tighten.co)**
-- **[Kirschbaum Development Group](https://kirschbaumdevelopment.com)**
-- **[64 Robots](https://64robots.com)**
-- **[Curotec](https://www.curotec.com/services/technologies/laravel)**
-- **[DevSquad](https://devsquad.com/hire-laravel-developers)**
-- **[Redberry](https://redberry.international/laravel-development)**
-- **[Active Logic](https://activelogic.com)**
+### 1. Persyaratan Sistem
+Pastikan komputer Anda sudah terpasang:
+* PHP >= 8.2 (dengan ekstensi SQLite dan ZIP aktif)
+* Composer
+* Node.js & NPM
+* Git
 
-## Contributing
+### 2. Langkah Instalasi
+1. Clone repositori ini ke komputer Anda:
+   ```bash
+   git clone https://github.com/username/repository-anda.git
+   cd repository-anda
+   ```
+2. Instal semua dependensi PHP & Javascript:
+   ```bash
+   composer install
+   ```
+   ```bash
+   npm install
+   ```
+3. Salin berkas `.env.example` menjadi `.env`:
+   ```bash
+   copy .env.example .env
+   ```
+4. Buat kunci keamanan aplikasi (*Application Key*):
+   ```bash
+   php artisan key:generate
+   ```
+5. Buat berkas database SQLite kosong (bawaan lokal):
+   * Buat file bernama `database.sqlite` di dalam folder `database/`.
+6. Jalankan migrasi tabel beserta data contoh awal (*seed*):
+   ```bash
+   php artisan migrate --seed
+   ```
+7. Kompilasi aset frontend dan nyalakan server lokal:
+   * **Terminal 1** (untuk server Laravel):
+     ```bash
+     php artisan serve
+     ```
+   * **Terminal 2** (untuk kompilasi aset CSS/JS):
+     ```bash
+     npm run dev
+     ```
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
+Buka browser Anda dan akses halaman `http://127.0.0.1:8000`. 
+* **User default admin**: `admin@almarjan.sch.id` (Password: `password`)
+* **User default guru**: `guru@almarjan.sch.id` (Password: `password`)
 
-## Code of Conduct
+---
 
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
+## Panduan Deployment Ke Internet
 
-## Security Vulnerabilities
+Untuk mendeploy aplikasi ini ke internet secara **100% gratis** dan **tanpa memerlukan kartu kredit** sama sekali, Anda bisa merujuk ke panduan khusus berikut:
 
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
+* **[Panduan Deploy Render & Supabase](render_supabase_deployment.md)** (Rekomendasi deploy gratis termudah).
+* **[Panduan Deploy Fly.io](fly_supabase_deployment.md)** (Rekomendasi deploy gratis dengan performa tercepat).
 
-## License
+---
 
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+## Lisensi
+Aplikasi ini berlisensi **MIT License** bebas digunakan dan dikembangkan untuk keperluan dunia pendidikan.
