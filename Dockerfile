@@ -36,5 +36,13 @@ RUN composer install --no-dev --optimize-autoloader
 RUN touch database/database.sqlite
 RUN chown -R www-data:www-data /var/www/html/storage /var/www/html/bootstrap/cache /var/www/html/database
 
+# Salin dan beri izin eksekusi pada entrypoint script
+COPY docker-entrypoint.sh /usr/local/bin/docker-entrypoint.sh
+RUN chmod +x /usr/local/bin/docker-entrypoint.sh
+
 # Port default Apache
 EXPOSE 80
+
+# Jalankan entrypoint script (migrate + seed + start apache)
+ENTRYPOINT ["/usr/local/bin/docker-entrypoint.sh"]
+
