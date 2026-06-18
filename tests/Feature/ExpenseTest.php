@@ -138,4 +138,176 @@ class ExpenseTest extends TestCase
         $response->assertHeader('content-type', 'application/pdf');
         $this->assertNotEmpty($response->getContent());
     }
+
+    public function test_uploaded_image_is_resized_and_compressed(): void
+    {
+        $user = User::factory()->create(['role' => 'teacher']);
+        $category = ExpenseCategory::create(['name' => 'ATK']);
+        $ay = AcademicYear::create([
+            'name' => '2025/2026',
+            'start_date' => '2025-07-01',
+            'end_date' => '2026-06-30',
+            'is_active' => true,
+        ]);
+
+        // Buat file gambar JPEG asli berukuran 2000x2000 piksel menggunakan GD
+        $image = imagecreatetruecolor(2000, 2000);
+        $bg = imagecolorallocate($image, 255, 255, 255);
+        imagefill($image, 0, 0, $bg);
+        
+        $tempFile = tempnam(sys_get_temp_dir(), 'test_large_');
+        imagejpeg($image, $tempFile, 100);
+        imagedestroy($image);
+
+        $file = new UploadedFile(
+            $tempFile,
+            'large_photo.jpg',
+            'image/jpeg',
+            null,
+            true
+        );
+
+        $response = $this->actingAs($user)
+            ->withSession(['selected_academic_year_id' => $ay->id])
+            ->post(route('expenses.store'), [
+                'expense_category_id' => $category->id,
+                'date' => '2025-08-01',
+                'amount' => 150000,
+                'notes' => 'Beli spidol',
+                'attachment' => $file,
+            ]);
+
+        $response->assertRedirect(route('expenses.index'));
+
+        $expense = \App\Models\Expense::first();
+        $this->assertNotNull($expense->attachment_path);
+
+        $disk = config('filesystems.default') === 'local' ? 'public' : config('filesystems.default');
+        $storedContents = \Illuminate\Support\Facades\Storage::disk($disk)->get($expense->attachment_path);
+        
+        // Simpan sementara konten yang tersimpan di storage untuk memeriksa dimensinya
+        $tempStoredFile = tempnam(sys_get_temp_dir(), 'stored_');
+        file_put_contents($tempStoredFile, $storedContents);
+        
+        $info = getimagesize($tempStoredFile);
+        $this->assertEquals(1200, $info[0]); // Pastikan lebar resized ke 1200px
+        
+        // Bersihkan file
+        unlink($tempStoredFile);
+        if (\Illuminate\Support\Facades\Storage::disk($disk)->exists($expense->attachment_path)) {
+            \Illuminate\Support\Facades\Storage::disk($disk)->delete($expense->attachment_path);
+        }
+    }
+
+    public function test_non_image_file_is_uploaded_without_modification(): void
+    {
+        $user = User::factory()->create(['role' => 'teacher']);
+        $category = ExpenseCategory::create(['name' => 'ATK']);
+        $ay = AcademicYear::create([
+            'name' => '2025/2026',
+            'start_date' => '2025-07-01',
+            'end_date' => '2026-06-30',
+            'is_active' => true,
+        ]);
+
+        $pdfContent = "%PDF-1.4 Fake PDF Content for LPJ Verification";
+        $tempFile = tempnam(sys_get_temp_dir(), 'test_pdf_');
+        file_put_contents($tempFile, $pdfContent);
+
+        $file = new UploadedFile(
+            $tempFile,
+            'document.pdf',
+            'application/pdf',
+            null,
+            true
+        );
+
+        $response = $this->actingAs($user)
+            ->withSession(['selected_academic_year_id' => $ay->id])
+            ->post(route('expenses.store'), [
+                'expense_category_id' => $category->id,
+                'date' => '2025-08-01',
+                'amount' => 150000,
+                'notes' => 'Beli spidol',
+                'attachment' => $file,
+            ]);
+
+        $response->assertRedirect(route('expenses.index'));
+
+        $expense = \App\Models\Expense::first();
+        $disk = config('filesystems.default') === 'local' ? 'public' : config('filesystems.default');
+        
+        // Pastikan konten file PDF sama persis tanpa mengalami modifikasi/kompresi
+        $this->assertEquals($pdfContent, \Illuminate\Support\Facades\Storage::disk($disk)->get($expense->attachment_path));
+
+        // Bersihkan
+        if (\Illuminate\Support\Facades\Storage::disk($disk)->exists($expense->attachment_path)) {
+            \Illuminate\Support\Facades\Storage::disk($disk)->delete($expense->attachment_path);
+        }
+    }
+
+    public function test_upload_exceeding_10mb_fails_validation(): void
+    {
+        $user = User::factory()->create(['role' => 'teacher']);
+        $category = ExpenseCategory::create(['name' => 'ATK']);
+        $ay = AcademicYear::create([
+            'name' => '2025/2026',
+            'start_date' => '2025-07-01',
+            'end_date' => '2026-06-30',
+            'is_active' => true,
+        ]);
+
+        // File 11 MB (11 * 1024 KB)
+        $largeFile = UploadedFile::fake()->create('receipt.pdf', 11 * 1024);
+
+        $response = $this->actingAs($user)
+            ->withSession(['selected_academic_year_id' => $ay->id])
+            ->post(route('expenses.store'), [
+                'expense_category_id' => $category->id,
+                'date' => '2025-08-01',
+                'amount' => 150000,
+                'notes' => 'Beli kertas',
+                'attachment' => $largeFile,
+            ]);
+
+        $response->assertSessionHasErrors(['attachment']);
+        $errors = session('errors')->get('attachment');
+        $this->assertStringContainsString('maksimal adalah 10MB', $errors[0]);
+    }
+
+    public function test_upload_within_10mb_limit_succeeds(): void
+    {
+        $user = User::factory()->create(['role' => 'teacher']);
+        $category = ExpenseCategory::create(['name' => 'ATK']);
+        $ay = AcademicYear::create([
+            'name' => '2025/2026',
+            'start_date' => '2025-07-01',
+            'end_date' => '2026-06-30',
+            'is_active' => true,
+        ]);
+
+        // File 9.5 MB (9.5 * 1024 KB)
+        $file = UploadedFile::fake()->create('receipt.pdf', 9.5 * 1024);
+
+        $response = $this->actingAs($user)
+            ->withSession(['selected_academic_year_id' => $ay->id])
+            ->post(route('expenses.store'), [
+                'expense_category_id' => $category->id,
+                'date' => '2025-08-01',
+                'amount' => 150000,
+                'notes' => 'Beli kertas',
+                'attachment' => $file,
+            ]);
+
+        $response->assertRedirect(route('expenses.index'));
+        $response->assertSessionHasNoErrors();
+
+        $expense = \App\Models\Expense::first();
+        $disk = config('filesystems.default') === 'local' ? 'public' : config('filesystems.default');
+        
+        // Bersihkan
+        if (\Illuminate\Support\Facades\Storage::disk($disk)->exists($expense->attachment_path)) {
+            \Illuminate\Support\Facades\Storage::disk($disk)->delete($expense->attachment_path);
+        }
+    }
 }

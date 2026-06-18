@@ -62,7 +62,7 @@
                 <div class="mb-4">
                     <label for="attachment" class="form-label small font-weight-500">Unggah File Bukti / Nota Belanja <span class="text-danger">*</span></label>
                     <input type="file" class="form-control @error('attachment') is-invalid @enderror" name="attachment" id="attachment" accept=".jpg, .jpeg, .png, .pdf, .doc, .docx" required>
-                    <span class="helper-text">Format didukung: JPG, PNG, PDF, Word (doc/docx) (Maks. 5MB)</span>
+                    <span class="helper-text">Format didukung: JPG, PNG, PDF, Word (doc/docx) (Maks. 10MB)</span>
                     @error('attachment')
                         <div class="invalid-feedback">{{ $message }}</div>
                     @enderror

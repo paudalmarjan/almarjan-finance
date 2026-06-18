@@ -70,7 +70,7 @@
                     <td>{{ $exp->user ? $exp->user->name : '-' }}</td>
                     <td class="text-center">
                         @if($exp->attachment_path)
-                            <a href="{{ asset($exp->attachment_path) }}" target="_blank" class="btn btn-sm btn-outline-info p-1 px-2" style="font-size: 0.8rem;">
+                            <a href="{{ $exp->attachment_url }}" target="_blank" class="btn btn-sm btn-outline-info p-1 px-2" style="font-size: 0.8rem;">
                                 <i class="bi bi-file-earmark-image"></i> Lihat Bukti
                             </a>
                         @else

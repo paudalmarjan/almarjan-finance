@@ -155,32 +155,34 @@
             
             @if($exp->attachment_path)
                 @php
-                    $fullPath = public_path($exp->attachment_path);
-                    $extension = strtolower(pathinfo($fullPath, PATHINFO_EXTENSION));
+                    $defaultDisk = config('filesystems.default');
+                    $disk = ($defaultDisk === 'local') ? 'public' : $defaultDisk;
+                    $exists = \Illuminate\Support\Facades\Storage::disk($disk)->exists($exp->attachment_path);
+                    $extension = strtolower(pathinfo($exp->attachment_path, PATHINFO_EXTENSION));
                 @endphp
 
-                @if(file_exists($fullPath))
+                @if($exists)
                     @if(in_array($extension, ['jpg', 'jpeg', 'png']))
                         <!-- Embedded Image for JPG/PNG -->
-                        <img class="receipt-image" src="data:image/{{ $extension }};base64,{{ base64_encode(file_get_contents($fullPath)) }}">
+                        <img class="receipt-image" src="data:image/{{ $extension }};base64,{{ base64_encode(\Illuminate\Support\Facades\Storage::disk($disk)->get($exp->attachment_path)) }}">
                     @elseif($extension === 'pdf')
                         <!-- PDF Placeholder message -->
                         <div class="receipt-placeholder">
                             <strong>Berkas Bukti Berformat PDF:</strong><br>
                             <span style="font-family: monospace;">{{ basename($exp->attachment_path) }}</span><br><br>
-                            <span style="font-size: 10px; color: #888;">(Berkas PDF tidak dapat digabung langsung secara otomatis ke cetakan PDF ini. Silakan periksa di folder unggahan server: <code>/uploads/expenses/{{ basename($exp->attachment_path) }}</code>)</span>
+                            <span style="font-size: 10px; color: #888;">(Berkas PDF tidak dapat digabung langsung secara otomatis ke cetakan PDF ini. Silakan periksa di folder/penyimpanan cloud: <code>{{ $exp->attachment_path }}</code>)</span>
                         </div>
                     @elseif(in_array($extension, ['doc', 'docx']))
                         <!-- Word Document Placeholder message -->
                         <div class="receipt-placeholder">
                             <strong>Berkas Bukti Berformat Microsoft Word:</strong><br>
                             <span style="font-family: monospace;">{{ basename($exp->attachment_path) }}</span><br><br>
-                            <span style="font-size: 10px; color: #888;">(Berkas Word tidak dapat digabung langsung secara otomatis ke cetakan PDF ini. Silakan periksa di folder unggahan server: <code>/uploads/expenses/{{ basename($exp->attachment_path) }}</code>)</span>
+                            <span style="font-size: 10px; color: #888;">(Berkas Word tidak dapat digabung langsung secara otomatis ke cetakan PDF ini. Silakan periksa di folder/penyimpanan cloud: <code>{{ $exp->attachment_path }}</code>)</span>
                         </div>
                     @endif
                 @else
                     <div class="receipt-placeholder" style="color: #ef4444;">
-                        <strong>Berkas bukti fisik tidak ditemukan di server ({{ basename($exp->attachment_path) }})</strong>
+                        <strong>Berkas bukti fisik tidak ditemukan di storage ({{ basename($exp->attachment_path) }})</strong>
                     </div>
                 @endif
             @else
