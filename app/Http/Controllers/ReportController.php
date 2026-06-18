@@ -27,16 +27,16 @@ class ReportController extends Controller
             return redirect()->route('dashboard')->with('error', 'Silakan pilih Tahun Ajaran.');
         }
 
-        // Default date range is the Academic Year start and end dates
-        $startDate = $request->filled('start_date') ? $request->start_date : $selectedYear->start_date->format('Y-m-d');
-        $endDate = $request->filled('end_date') ? $request->end_date : $selectedYear->end_date->format('Y-m-d');
+        // Optional date range
+        $startDate = $request->filled('start_date') ? $request->start_date : null;
+        $endDate = $request->filled('end_date') ? $request->end_date : null;
 
         // Fetch income (payment transactions)
-        $incomes = PaymentTransaction::where('academic_year_id', $selectedYearId)
-            ->whereBetween('date', [$startDate, $endDate])
-            ->with('student')
-            ->get()
-            ->map(function ($item) {
+        $incomeQuery = PaymentTransaction::where('academic_year_id', $selectedYearId)->with('student');
+        if ($startDate && $endDate) {
+            $incomeQuery->whereBetween('date', [$startDate, $endDate]);
+        }
+        $incomes = $incomeQuery->get()->map(function ($item) {
                 return [
                     'date' => $item->date,
                     'type' => 'Pemasukan',
@@ -47,10 +47,11 @@ class ReportController extends Controller
             });
 
         // Fetch expenses
-        $outcomes = Expense::whereBetween('date', [$startDate, $endDate])
-            ->with('expenseCategory')
-            ->get()
-            ->map(function ($item) {
+        $outcomeQuery = Expense::where('academic_year_id', $selectedYearId)->with('expenseCategory');
+        if ($startDate && $endDate) {
+            $outcomeQuery->whereBetween('date', [$startDate, $endDate]);
+        }
+        $outcomes = $outcomeQuery->get()->map(function ($item) {
                 return [
                     'date' => $item->date,
                     'type' => 'Pengeluaran',
@@ -208,7 +209,8 @@ class ReportController extends Controller
         $startDate = $request->filled('start_date') ? $request->start_date : date('Y-m-01');
         $endDate = $request->filled('end_date') ? $request->end_date : date('Y-m-t');
 
-        $expenses = Expense::whereBetween('date', [$startDate, $endDate])
+        $expenses = Expense::where('academic_year_id', $selectedYearId)
+            ->whereBetween('date', [$startDate, $endDate])
             ->with(['expenseCategory', 'user'])
             ->orderBy('date', 'asc')
             ->get();
@@ -228,7 +230,9 @@ class ReportController extends Controller
         $startDate = $request->start_date;
         $endDate = $request->end_date;
 
-        $expenses = Expense::whereBetween('date', [$startDate, $endDate])
+        $selectedYearId = session('selected_academic_year_id');
+        $expenses = Expense::where('academic_year_id', $selectedYearId)
+            ->whereBetween('date', [$startDate, $endDate])
             ->with(['expenseCategory', 'user'])
             ->orderBy('date', 'asc')
             ->get();

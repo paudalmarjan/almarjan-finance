@@ -8,7 +8,7 @@ use Illuminate\Support\Facades\Storage;
 
 class Expense extends Model
 {
-    protected $fillable = ['expense_category_id', 'user_id', 'date', 'amount', 'notes', 'attachment_path'];
+    protected $fillable = ['academic_year_id', 'expense_category_id', 'user_id', 'date', 'amount', 'notes', 'attachment_path'];
 
     protected $casts = [
         'date' => 'date',
@@ -24,6 +24,11 @@ class Expense extends Model
         }
         $disk = config('filesystems.default') === 's3' ? 's3' : 'public';
         return Storage::disk($disk)->url($this->attachment_path);
+    }
+
+    public function academicYear(): BelongsTo
+    {
+        return $this->belongsTo(AcademicYear::class);
     }
 
     public function expenseCategory(): BelongsTo

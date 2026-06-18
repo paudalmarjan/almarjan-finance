@@ -101,6 +101,7 @@ class ExpenseController extends Controller
         }
 
         Expense::create([
+            'academic_year_id' => session('selected_academic_year_id'),
             'expense_category_id' => $request->expense_category_id,
             'user_id' => auth()->id(),
             'date' => $request->date,

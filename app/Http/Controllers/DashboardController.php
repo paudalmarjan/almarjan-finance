@@ -59,8 +59,8 @@ class DashboardController extends Controller
         // 2. Calculate Income
         $totalIncome = (float) $incomeQuery->sum('total_amount');
 
-        // 3. Calculate Expenses (Expenses are school-wide, but date-scoped to the selected Academic Year)
-        $totalOutcome = (float) Expense::whereBetween('date', [$selectedYear->start_date, $selectedYear->end_date])->sum('amount');
+        // 3. Calculate Expenses (Expenses are scoped to the selected Academic Year)
+        $totalOutcome = (float) Expense::where('academic_year_id', $selectedYearId)->sum('amount');
 
         // 4. Calculate Net Balance
         $currentBalance = (float) $selectedYear->initial_cash_balance + $totalIncome - $totalOutcome;
@@ -150,7 +150,8 @@ class DashboardController extends Controller
                 ->sum('total_amount');
 
             // Calculate expense for this month
-            $mOutcome = (float) Expense::whereYear('date', $year)
+            $mOutcome = (float) Expense::where('academic_year_id', $selectedYearId)
+                ->whereYear('date', $year)
                 ->whereMonth('date', $month)
                 ->sum('amount');
 
@@ -177,7 +178,7 @@ class DashboardController extends Controller
             });
 
         // Load recent expenses
-        $recentExpenses = Expense::whereBetween('date', [$selectedYear->start_date, $selectedYear->end_date])
+        $recentExpenses = Expense::where('academic_year_id', $selectedYearId)
             ->with('expenseCategory')
             ->orderBy('date', 'desc')
             ->orderBy('created_at', 'desc')
@@ -234,7 +235,7 @@ class DashboardController extends Controller
         $currentMonthName = $monthNames[$currentSppIndex] ?? 'Juli';
 
         // 9. Expense Distribution by Category
-        $expenseDistribution = Expense::whereBetween('date', [$selectedYear->start_date, $selectedYear->end_date])
+        $expenseDistribution = Expense::where('academic_year_id', $selectedYearId)
             ->join('expense_categories', 'expenses.expense_category_id', '=', 'expense_categories.id')
             ->select('expense_categories.name as category_name', DB::raw('SUM(expenses.amount) as total_amount'))
             ->groupBy('expense_categories.name')
