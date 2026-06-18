@@ -29,11 +29,35 @@ body {
     position: sticky;
     top: 0;
     height: 100vh;
+    width: 240px;
+    min-width: 240px;
     overflow-y: auto;
+    overflow-x: hidden;
     color: #e2e8f0;
-    transition: all var(--transition-speed);
+    transition: box-shadow var(--transition-speed);
     box-shadow: 4px 0 10px rgba(0, 0, 0, 0.05);
+    scrollbar-width: thin;
+    scrollbar-color: rgba(255, 255, 255, 0.15) rgba(0, 0, 0, 0.1);
 }
+
+/* Scrollbar khusus untuk area sidebar agar menyatu */
+.sidebar::-webkit-scrollbar {
+    width: 6px;
+}
+
+.sidebar::-webkit-scrollbar-track {
+    background: rgba(0, 0, 0, 0.1);
+}
+
+.sidebar::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.15);
+    border-radius: 10px;
+}
+
+.sidebar::-webkit-scrollbar-thumb:hover {
+    background: rgba(255, 255, 255, 0.3);
+}
+
 
 .sidebar .brand {
     font-weight: 700;
@@ -44,14 +68,16 @@ body {
 
 .sidebar .nav-link {
     color: #94a3b8;
+    font-size: 0.82rem;
     font-weight: 500;
-    padding: 10px 15px;
+    padding: 10px 14px;
     border-radius: 8px;
     margin: 4px 12px;
     transition: all var(--transition-speed);
     display: flex;
     align-items: center;
-    gap: 12px;
+    gap: 10px;
+    white-space: nowrap;
 }
 
 .sidebar .nav-link:hover {
@@ -211,6 +237,9 @@ body {
     text-transform: uppercase;
     letter-spacing: 0.8px;
     padding: 0 24px;
-    margin-top: 22px;
+    margin-top: 18px;
     margin-bottom: 6px;
+    white-space: nowrap;
+    overflow: hidden;
+    transition: all 0.2s ease;
 }

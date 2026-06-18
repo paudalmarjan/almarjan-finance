@@ -16,13 +16,13 @@
 <body>
     <div class="layout-wrapper">
         <!-- Sidebar -->
-        <aside class="sidebar col-auto col-md-3 col-xl-2 px-sm-2 px-0 d-flex flex-column align-items-stretch" id="sidebar">
-            <div class="d-flex align-items-center justify-content-between px-3 pt-4 pb-3 brand border-bottom" style="border-color: rgba(255, 255, 255, 0.1) !important;">
+        <aside class="sidebar d-flex flex-column align-items-stretch" id="sidebar">
+            <div class="d-flex align-items-center justify-content-between px-3 pt-3 pb-2 brand border-bottom" style="border-color: rgba(255, 255, 255, 0.1) !important;">
                 <div class="d-flex align-items-center gap-2">
-                    <img src="{{ asset('images/logo.png') }}" alt="Logo Al-Marjan" class="img-fluid rounded" style="max-height: 32px; background: white; padding: 2px;">
+                    <img src="{{ asset('images/logo.png') }}" alt="Logo Al-Marjan" class="img-fluid rounded flex-shrink-0" style="max-height: 32px; background: white; padding: 2px;">
                     <div class="d-flex flex-column lh-sm">
-                        <span class="d-none d-sm-inline brand-text fs-6 fw-bold text-white">AL-MARJAN</span>
-                        <span class="d-none d-sm-inline text-white-50" style="font-size: 0.65rem; font-weight: 500;">Keuangan</span>
+                        <span class="brand-text fs-6 fw-bold text-white">AL-MARJAN</span>
+                        <span class="brand-tagline text-white-50" style="font-size: 0.65rem; font-weight: 500;">Keuangan</span>
                     </div>
                 </div>
             </div>
@@ -95,12 +95,12 @@
             </div>
 
             <!-- User Info Sidebar footer -->
-            <div class="dropdown border-top border-secondary p-3 mt-auto">
-                <a href="#" class="d-flex align-items-center text-white text-decoration-none dropdown-toggle" id="dropdownUser1" data-bs-toggle="dropdown" aria-expanded="false">
-                    <div class="avatar bg-primary text-white rounded-circle d-flex align-items-center justify-content-center me-2" style="width: 32px; height: 32px; font-weight: 600;">
+            <div class="dropdown border-top border-secondary mt-auto">
+                <a href="#" class="sidebar-user-footer d-flex align-items-center text-white text-decoration-none dropdown-toggle p-3" id="dropdownUser1" data-bs-toggle="dropdown" aria-expanded="false">
+                    <div class="avatar bg-primary text-white rounded-circle d-flex align-items-center justify-content-center me-2 flex-shrink-0" style="width: 32px; height: 32px; font-weight: 600;">
                         {{ strtoupper(substr(auth()->user()->name, 0, 1)) }}
                     </div>
-                    <span class="d-none d-sm-inline me-1">{{ auth()->user()->name }}</span>
+                    <span class="user-name-text text-truncate me-1" style="max-width: 120px; overflow: hidden;">{{ auth()->user()->name }}</span>
                 </a>
                 <ul class="dropdown-menu dropdown-menu-dark text-small shadow" aria-labelledby="dropdownUser1">
                     <li><a class="dropdown-menu-item dropdown-item" href="{{ route('profile.edit') }}"><i class="bi bi-person me-2"></i> Profil</a></li>
@@ -256,25 +256,32 @@
 
         // Global Search Modal handler
         let searchModalObj = null;
+        const globalSearchModalEl = document.getElementById('globalSearchModal');
+
+        // Focus input reliably after modal animation fully completes
+        globalSearchModalEl.addEventListener('shown.bs.modal', function () {
+            const input = document.getElementById('global_search_modal_input');
+            if (input) input.focus();
+        });
 
         function openGlobalSearchModal() {
             if (!searchModalObj) {
-                searchModalObj = new bootstrap.Modal(document.getElementById('globalSearchModal'));
+                searchModalObj = new bootstrap.Modal(globalSearchModalEl);
+            }
+            // Reset state before showing
+            const input = document.getElementById('global_search_modal_input');
+            if (input) input.value = '';
+            document.getElementById('global_search_results').classList.add('d-none');
+            const placeholder = document.getElementById('global_search_placeholder');
+            if (placeholder) {
+                placeholder.classList.remove('d-none');
+                placeholder.innerHTML = `
+                    <i class="bi bi-person-badge fs-2 text-light d-block mb-2"></i>
+                    <span class="small">Ketik minimal 2 karakter untuk memulai pencarian...</span>
+                `;
             }
             searchModalObj.show();
-            setTimeout(() => {
-                const input = document.getElementById('global_search_modal_input');
-                if (input) {
-                    input.value = '';
-                    input.focus();
-                    document.getElementById('global_search_results').classList.add('d-none');
-                    document.getElementById('global_search_placeholder').classList.remove('d-none');
-                    document.getElementById('global_search_placeholder').innerHTML = `
-                        <i class="bi bi-person-badge fs-2 text-light d-block mb-2"></i>
-                        <span class="small">Ketik minimal 2 karakter untuk memulai pencarian...</span>
-                    `;
-                }
-            }, 300);
+            // focus() is handled by shown.bs.modal event above
         }
 
         // Shortcut Ctrl + K or Cmd + K
