@@ -9,6 +9,7 @@ use App\Http\Controllers\PromotionController;
 use App\Http\Controllers\ReportController;
 use App\Http\Controllers\SettingController;
 use Illuminate\Support\Facades\Route;
+use Illuminate\Support\Facades\Artisan;
 
 // Redirect / to dashboard
 Route::redirect('/', '/dashboard');
@@ -89,6 +90,11 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::post('/settings/users', [SettingController::class, 'storeUser'])->name('settings.users.store');
         Route::delete('/settings/users/{user}', [SettingController::class, 'destroyUser'])->name('settings.users.destroy');
     });
+});
+
+Route::get('/run-migrations', function () {
+    Artisan::call('migrate', ['--force' => true]);
+    return 'Database berhasil dimigrasi: <pre>' . Artisan::output() . '</pre>';
 });
 
 require __DIR__.'/auth.php';
