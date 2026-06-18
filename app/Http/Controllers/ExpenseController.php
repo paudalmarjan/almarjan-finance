@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\DB;
 use App\Models\Expense;
 use App\Models\ExpenseCategory;
 
@@ -30,7 +31,8 @@ class ExpenseController extends Controller
 
         // Filter by Search (Notes)
         if ($request->filled('search')) {
-            $query->where('notes', 'like', "%{$request->search}%");
+            $like = DB::connection()->getDriverName() === 'pgsql' ? 'ilike' : 'like';
+            $query->where('notes', $like, "%{$request->search}%");
         }
 
         $expenses = $query->paginate(20);

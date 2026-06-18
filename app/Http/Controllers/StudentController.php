@@ -22,12 +22,13 @@ class StudentController extends Controller
     {
         $selectedYearId = session('selected_academic_year_id');
         $q = $request->input('q');
+        $like = DB::connection()->getDriverName() === 'pgsql' ? 'ilike' : 'like';
 
         $enrollments = StudentEnrollment::where('academic_year_id', $selectedYearId)
-            ->whereHas('student', function ($query) use ($q) {
-                $query->where('name', 'like', "%{$q}%")
-                      ->orWhere('nis', 'like', "%{$q}%")
-                      ->orWhere('nickname', 'like', "%{$q}%");
+            ->whereHas('student', function ($query) use ($q, $like) {
+                $query->where('name', $like, "%{$q}%")
+                      ->orWhere('nis', $like, "%{$q}%")
+                      ->orWhere('nickname', $like, "%{$q}%");
             })
             ->with(['student', 'studentGroup'])
             ->limit(10)
@@ -88,10 +89,11 @@ class StudentController extends Controller
         // Filter by Search Name/NIS/Nickname
         if ($request->filled('search')) {
             $search = $request->search;
-            $query->whereHas('student', function ($q) use ($search) {
-                $q->where('name', 'like', "%{$search}%")
-                  ->orWhere('nis', 'like', "%{$search}%")
-                  ->orWhere('nickname', 'like', "%{$search}%");
+            $like = DB::connection()->getDriverName() === 'pgsql' ? 'ilike' : 'like';
+            $query->whereHas('student', function ($q) use ($search, $like) {
+                $q->where('name', $like, "%{$search}%")
+                  ->orWhere('nis', $like, "%{$search}%")
+                  ->orWhere('nickname', $like, "%{$search}%");
             });
         }
 

@@ -37,10 +37,11 @@ class PaymentController extends Controller
         // Filter by Search (Student Name or Invoice Number)
         if ($request->filled('search')) {
             $search = $request->search;
-            $query->where(function ($q) use ($search) {
-                $q->where('receipt_number', 'like', "%{$search}%")
-                  ->orWhereHas('student', function ($sq) use ($search) {
-                      $sq->where('name', 'like', "%{$search}%");
+            $like = DB::connection()->getDriverName() === 'pgsql' ? 'ilike' : 'like';
+            $query->where(function ($q) use ($search, $like) {
+                $q->where('receipt_number', $like, "%{$search}%")
+                  ->orWhereHas('student', function ($sq) use ($search, $like) {
+                      $sq->where('name', $like, "%{$search}%");
                   });
             });
         }
