@@ -22,53 +22,32 @@
                     <img src="{{ asset('images/logo.png') }}" alt="Logo Al-Marjan" class="img-fluid rounded flex-shrink-0" style="max-height: 32px; background: white; padding: 2px;">
                     <div class="d-flex flex-column lh-sm">
                         <span class="brand-text fs-6 fw-bold text-white">AL-MARJAN</span>
-                        <span class="brand-tagline text-white-50" style="font-size: 0.65rem; font-weight: 500;">Keuangan</span>
+                        <span class="brand-tagline text-white-50" style="font-size: 0.65rem; font-weight: 500; color: #d8b4fe !important;">Master Data</span>
                     </div>
                 </div>
             </div>
             
             <div class="nav flex-column mb-auto mt-3" id="menu">
-                <a href="{{ route('dashboard') }}" class="nav-link {{ request()->routeIs('dashboard') ? 'active' : '' }}">
-                    <i class="bi bi-speedometer2"></i>
-                    <span class="ms-1 d-none d-sm-inline">Beranda</span>
+                <div class="sidebar-section-title d-none d-sm-block">Akademik & Siswa</div>
+                
+                <a href="{{ route('students.index') }}" class="nav-link {{ request()->routeIs('students.*') ? 'active' : '' }}">
+                    <i class="bi bi-people"></i>
+                    <span class="ms-1 d-none d-sm-inline">Daftar Siswa</span>
                 </a>
                 
-                <div class="sidebar-section-title d-none d-sm-block">Penerimaan</div>
+                @if(auth()->user()->isAdmin())
+                <a href="{{ route('promotions.index') }}" class="nav-link {{ request()->routeIs('promotions.*') ? 'active' : '' }}">
+                    <i class="bi bi-box-arrow-up"></i>
+                    <span class="ms-1 d-none d-sm-inline">Kenaikan Kelas</span>
+                </a>
                 
-                <a href="{{ route('payments.create') }}" class="nav-link {{ request()->routeIs('payments.create') ? 'active' : '' }}">
-                    <i class="bi bi-cash-coin"></i>
-                    <span class="ms-1 d-none d-sm-inline">Catat Pembayaran</span>
-                </a>
-                <a href="{{ route('payments.index') }}" class="nav-link {{ request()->routeIs('payments.index') && !request()->routeIs('payments.create') ? 'active' : '' }}">
-                    <i class="bi bi-receipt"></i>
-                    <span class="ms-1 d-none d-sm-inline">Riwayat Transaksi</span>
-                </a>
-
-                <div class="sidebar-section-title d-none d-sm-block">Pengeluaran</div>
+                <div class="sidebar-section-title d-none d-sm-block">Pengaturan</div>
                 
-                <a href="{{ route('expenses.create') }}" class="nav-link {{ request()->routeIs('expenses.create') ? 'active' : '' }}">
-                    <i class="bi bi-journal-arrow-down"></i>
-                    <span class="ms-1 d-none d-sm-inline">Catat Pengeluaran</span>
+                <a href="{{ route('settings.index') }}" class="nav-link {{ request()->routeIs('settings.*') ? 'active' : '' }}">
+                    <i class="bi bi-gear"></i>
+                    <span class="ms-1 d-none d-sm-inline">Pengaturan Sistem</span>
                 </a>
-                <a href="{{ route('expenses.index') }}" class="nav-link {{ request()->routeIs('expenses.index') && !request()->routeIs('expenses.create') ? 'active' : '' }}">
-                    <i class="bi bi-journal-text"></i>
-                    <span class="ms-1 d-none d-sm-inline">Riwayat Pengeluaran</span>
-                </a>
-
-                <div class="sidebar-section-title d-none d-sm-block">Laporan</div>
-                
-                <a href="{{ route('reports.finance') }}" class="nav-link {{ request()->routeIs('reports.finance') ? 'active' : '' }}">
-                    <i class="bi bi-graph-up-arrow"></i>
-                    <span class="ms-1 d-none d-sm-inline">Laporan Keuangan</span>
-                </a>
-                <a href="{{ route('reports.arrears') }}" class="nav-link {{ request()->routeIs('reports.arrears') ? 'active' : '' }}">
-                    <i class="bi bi-exclamation-octagon"></i>
-                    <span class="ms-1 d-none d-sm-inline">Data Tunggakan</span>
-                </a>
-                <a href="{{ route('reports.lpj') }}" class="nav-link {{ request()->routeIs('reports.lpj') ? 'active' : '' }}">
-                    <i class="bi bi-archive"></i>
-                    <span class="ms-1 d-none d-sm-inline">Unduh LPJ</span>
-                </a>
+                @endif
             </div>
 
             <!-- User Info Sidebar footer -->
@@ -110,9 +89,9 @@
                             <li><h6 class="dropdown-header">Aplikasi PAUD Hub</h6></li>
                             <li><a class="dropdown-item" href="{{ route('portal') }}"><i class="bi bi-house me-2"></i> Portal Utama</a></li>
                             <li><hr class="dropdown-divider"></li>
-                            <li><a class="dropdown-item active" href="{{ route('dashboard') }}"><i class="bi bi-currency-dollar me-2 text-success"></i> App Keuangan</a></li>
+                            <li><a class="dropdown-item" href="{{ route('dashboard') }}"><i class="bi bi-currency-dollar me-2 text-success"></i> App Keuangan</a></li>
                             <li><a class="dropdown-item" href="{{ route('savings.index') }}"><i class="bi bi-wallet2 me-2 text-info"></i> App Tabungan</a></li>
-                            <li><a class="dropdown-item" href="{{ route('settings.index') }}"><i class="bi bi-database-gear me-2 text-purple"></i> Master Data</a></li>
+                            <li><a class="dropdown-item active" href="{{ route('settings.index') }}"><i class="bi bi-database-gear me-2 text-purple"></i> Master Data</a></li>
                         </ul>
                     </div>
                     <!-- Global Search Input -->

@@ -10,14 +10,16 @@
             font-size: 12px;
             color: #000;
             margin: 0;
-            padding: 10px;
-            background-color: #fff;
+            padding: 20px;
+            background-color: #f8f9fa;
         }
         .receipt-box {
-            max-width: 580px;
+            max-width: 700px;
             margin: auto;
             border: 1px dashed #000;
-            padding: 15px;
+            padding: 20px;
+            background-color: #fff;
+            box-shadow: 0 0 10px rgba(0,0,0,0.05);
         }
         .header {
             text-align: center;
@@ -74,13 +76,34 @@
             width: 180px;
             font-size: 11px;
         }
+
+        /* Aturan Khusus Cetak A5 Landscape */
+        @media print {
+            @page {
+                size: A5 landscape;
+                margin: 10mm;
+            }
+            body {
+                background-color: #fff;
+                padding: 0;
+                margin: 0;
+            }
+            .receipt-box {
+                max-width: 100%;
+                width: 100%;
+                border: none;
+                padding: 0;
+                margin: 0;
+                box-shadow: none;
+            }
+        }
     </style>
 </head>
 <body onload="window.print()">
     <div class="receipt-box">
         <div class="header">
             <h3>PAUD AL MARJAN</h3>
-            <p>Jl. Raya Al Marjan No. 12, Kelapa Dua, Tangerang</p>
+            <p>Permata Depok Regency Ratujaya</p>
             <div class="divider"></div>
             <strong>KUITANSI BUKTI PEMBAYARAN</strong>
         </div>

@@ -26,4 +26,14 @@ class Student extends Model
     {
         return $this->hasMany(PaymentTransaction::class);
     }
+
+    public function savings()
+    {
+        return $this->hasOne(StudentSaving::class);
+    }
+
+    public function savingsTransactions(): HasMany
+    {
+        return $this->hasMany(StudentSavingsTransaction::class);
+    }
 }

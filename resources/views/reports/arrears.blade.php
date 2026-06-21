@@ -5,7 +5,7 @@
 @section('content')
 <div class="d-flex flex-wrap justify-content-between align-items-center mb-4 gap-2">
     <div>
-        <h5 class="mb-1 font-weight-600">Laporan Tunggakan & Piutang Siswa</h5>
+        <h5 class="mb-1 font-weight-600">Laporan Tunggakan & Tagihan Siswa</h5>
         <div class="ay-badge">
             <i class="bi bi-calendar3"></i> Tahun Ajaran: {{ $selectedYear ? $selectedYear->name : 'N/A' }}
         </div>
@@ -55,8 +55,8 @@
 <div class="card-premium p-4 mb-4 border-start border-danger border-5">
     <div class="row align-items-center">
         <div class="col-md-8 mb-2 mb-md-0">
-            <h6 class="text-muted font-weight-500 mb-1">Total Piutang Belum Tertagih (Seluruh Siswa)</h6>
-            <p class="helper-text mb-0">Piutang dihitung berdasarkan kewajiban bayar Uang Tahunan serta tagihan SPP bulanan yang sudah jatuh tempo hingga bulan ini.</p>
+            <h6 class="text-muted font-weight-500 mb-1">Total Tagihan Belum Tertagih (Seluruh Siswa)</h6>
+            <p class="helper-text mb-0">Tagihan dihitung berdasarkan kewajiban bayar Uang Tahunan serta tagihan SPP bulanan yang sudah jatuh tempo hingga bulan ini.</p>
         </div>
         <div class="col-md-4 text-md-end">
             <h2 class="mb-0 font-weight-700 text-danger">Rp {{ number_format($totalReceivables, 0, ',', '.') }}</h2>

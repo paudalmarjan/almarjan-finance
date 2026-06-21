@@ -1,4 +1,4 @@
-@extends('layouts.app')
+@extends('layouts.master_data')
 
 @section('title', 'Daftar Siswa')
 

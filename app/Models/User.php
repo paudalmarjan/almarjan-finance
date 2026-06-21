@@ -48,9 +48,29 @@ class User extends Authenticatable
         ];
     }
 
+    public function isSuperAdmin(): bool
+    {
+        return in_array($this->role, ['admin', 'super_admin']);
+    }
+
+    public function isHeadmaster(): bool
+    {
+        return $this->role === 'headmaster';
+    }
+
+    public function isFinanceAdmin(): bool
+    {
+        return in_array($this->role, ['finance_admin', 'super_admin', 'admin']);
+    }
+
+    public function isSavingsAdmin(): bool
+    {
+        return in_array($this->role, ['savings_admin', 'super_admin', 'admin']);
+    }
+
     public function isAdmin(): bool
     {
-        return $this->role === 'admin';
+        return in_array($this->role, ['admin', 'super_admin', 'headmaster', 'finance_admin', 'savings_admin']);
     }
 
     public function isTeacher(): bool

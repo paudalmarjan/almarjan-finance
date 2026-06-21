@@ -1,4 +1,4 @@
-@extends('layouts.app')
+@extends('layouts.master_data')
 
 @section('title', 'Pengaturan Sistem')
 
@@ -399,8 +399,14 @@
                                     <td class="font-weight-600">{{ $usr->name }}</td>
                                     <td>{{ $usr->email }}</td>
                                     <td>
-                                        @if($usr->isAdmin())
-                                            <span class="badge bg-dark">Administrator</span>
+                                        @if($usr->isSuperAdmin())
+                                            <span class="badge bg-dark">Admin Utama</span>
+                                        @elseif($usr->isHeadmaster())
+                                            <span class="badge bg-primary">Kepala Sekolah</span>
+                                        @elseif($usr->role === 'finance_admin')
+                                            <span class="badge bg-success">Admin Keuangan</span>
+                                        @elseif($usr->role === 'savings_admin')
+                                            <span class="badge bg-info text-dark">Admin Tabungan</span>
                                         @else
                                             <span class="badge bg-secondary">Guru / Staf</span>
                                         @endif
@@ -581,8 +587,11 @@
                     <div class="mb-3">
                         <label for="user_role" class="form-label small font-weight-500">Hak Akses (Role)</label>
                         <select class="form-select" name="role" id="user_role" required>
+                            <option value="super_admin">Admin Utama</option>
+                            <option value="headmaster">Kepala Sekolah / Yayasan</option>
+                            <option value="finance_admin">Admin Keuangan</option>
+                            <option value="savings_admin">Admin Tabungan</option>
                             <option value="teacher">Guru / Tata Usaha</option>
-                            <option value="admin">Admin (Kepala Sekolah / Yayasan)</option>
                         </select>
                     </div>
                     <div class="mb-3">

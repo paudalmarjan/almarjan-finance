@@ -347,7 +347,7 @@ class SettingController extends Controller
         $request->validate([
             'name' => 'required|string|max:255',
             'email' => 'required|string|email|max:255|unique:users,email,' . $request->id,
-            'role' => 'required|in:admin,teacher',
+            'role' => 'required|in:super_admin,admin,headmaster,finance_admin,savings_admin,teacher',
             'password' => $request->id ? 'nullable|min:6' : 'required|min:6',
         ]);
 

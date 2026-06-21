@@ -12,257 +12,172 @@ use App\Models\PaymentTransaction;
 use App\Models\PaymentDetail;
 use App\Models\Expense;
 use App\Models\GlobalSppSetting;
+use Carbon\Carbon;
 
 class DashboardController extends Controller
 {
     public function index(Request $request)
     {
         $selectedYearId = session('selected_academic_year_id');
-        $selectedYear = $selectedYearId ? AcademicYear::find($selectedYearId) : null;
+        $selectedYear   = $selectedYearId ? AcademicYear::find($selectedYearId) : null;
 
         if (!$selectedYear) {
             return redirect()->route('settings.index')->with('error', 'Silakan aktifkan Tahun Ajaran terlebih dahulu.');
         }
 
         $levels = Level::with('groups')->get();
+        $today  = Carbon::today();
 
-        // 1. Base Query Scopes for Filters
+        // ── Base Query Scopes ─────────────────────────────────────────────
         $studentQuery = StudentEnrollment::where('academic_year_id', $selectedYearId)
-            ->whereHas('student', function ($q) {
-                $q->where('status', 'Active');
-            });
+            ->whereHas('student', fn($q) => $q->where('status', 'Active'));
 
         $incomeQuery = PaymentTransaction::where('academic_year_id', $selectedYearId);
 
-        // Filter by Level
-        if ($request->filled('level_id')) {
-            $studentQuery->whereHas('studentGroup', function ($q) use ($request) {
-                $q->where('level_id', $request->level_id);
-            });
-            $incomeQuery->whereHas('student.enrollments', function ($q) use ($request, $selectedYearId) {
-                $q->where('academic_year_id', $selectedYearId)
-                  ->whereHas('studentGroup', function ($sg) use ($request) {
-                      $sg->where('level_id', $request->level_id);
-                  });
-            });
-        }
-
-        // Filter by Group
-        if ($request->filled('student_group_id')) {
-            $studentQuery->where('student_group_id', $request->student_group_id);
-            $incomeQuery->whereHas('student.enrollments', function ($q) use ($request, $selectedYearId) {
-                $q->where('academic_year_id', $selectedYearId)
-                  ->where('student_group_id', $request->student_group_id);
-            });
-        }
-
-        // 2. Calculate Income
-        $totalIncome = (float) $incomeQuery->sum('total_amount');
-
-        // 3. Calculate Expenses (Expenses are scoped to the selected Academic Year)
-        $totalOutcome = (float) Expense::where('academic_year_id', $selectedYearId)->sum('amount');
-
-        // 4. Calculate Net Balance
+        // ── Core Financials ───────────────────────────────────────────────
+        $totalIncome    = (float) $incomeQuery->sum('total_amount');
+        $totalOutcome   = (float) Expense::where('academic_year_id', $selectedYearId)->sum('amount');
         $currentBalance = (float) $selectedYear->initial_cash_balance + $totalIncome - $totalOutcome;
 
-        // 5. Calculate Arrears (piutang) for filtered student list
-        $activeEnrollments = $studentQuery->with(['studentAnnualFees', 'student'])->get();
-        $sppSetting = GlobalSppSetting::where('academic_year_id', $selectedYearId)->first();
+        $todayIncome      = (float) $incomeQuery->clone()->whereDate('date', $today)->sum('total_amount');
+        $thisMonthIncome  = (float) $incomeQuery->clone()->whereYear('date', $today->year)->whereMonth('date', $today->month)->sum('total_amount');
+        $thisMonthOutcome = (float) Expense::where('academic_year_id', $selectedYearId)->whereYear('date', $today->year)->whereMonth('date', $today->month)->sum('amount');
+        $thisMonthNet     = $thisMonthIncome - $thisMonthOutcome;
+
+        // ── Student Counts ────────────────────────────────────────────────
+        $totalStudentsCount      = (int) $studentQuery->clone()->count();
+        $discountedStudentsCount = (int) $studentQuery->clone()->whereNotNull('discount_category_id')->count();
+
+        // ── SPP Rate ──────────────────────────────────────────────────────
+        $sppSetting    = GlobalSppSetting::where('academic_year_id', $selectedYearId)->first();
         $baseSppAmount = $sppSetting ? $sppSetting->amount : 0.00;
 
-        // Determine current SPP index based on today
-        $today = date('Y-m-d');
         $currentSppIndex = 12;
-        if ($selectedYear->start_date->format('Y-m-d') > $today) {
+        $todayStr = $today->format('Y-m-d');
+        if ($selectedYear->start_date->format('Y-m-d') > $todayStr) {
             $currentSppIndex = 0;
-        } elseif ($selectedYear->start_date->format('Y-m-d') <= $today && $selectedYear->end_date->format('Y-m-d') >= $today) {
-            $currentMonth = (int) date('n');
-            $monthMap = [7=>1, 8=>2, 9=>3, 10=>4, 11=>5, 12=>6, 1=>7, 2=>8, 3=>9, 4=>10, 5=>11, 6=>12];
-            $currentSppIndex = $monthMap[$currentMonth] ?? 12;
+        } elseif ($selectedYear->start_date->format('Y-m-d') <= $todayStr && $selectedYear->end_date->format('Y-m-d') >= $todayStr) {
+            $monthMap        = [7=>1, 8=>2, 9=>3, 10=>4, 11=>5, 12=>6, 1=>7, 2=>8, 3=>9, 4=>10, 5=>11, 6=>12];
+            $currentSppIndex = $monthMap[$today->month] ?? 12;
         }
 
-        $totalArrears = 0.00;
+        $monthNames       = [1=>'Juli', 2=>'Agustus', 3=>'September', 4=>'Oktober', 5=>'November', 6=>'Desember', 7=>'Januari', 8=>'Februari', 9=>'Maret', 10=>'April', 11=>'Mei', 12=>'Juni'];
+        $currentMonthName = $monthNames[$currentSppIndex] ?? 'Juli';
+
+        $paidSppCount   = 0;
+        $sppPaymentRate = 100;
+        if ($currentSppIndex >= 2) {
+            $paidSppCount = StudentEnrollment::where('academic_year_id', $selectedYearId)
+                ->whereHas('student', fn($q) => $q->where('status', 'Active'))
+                ->whereHas('student.paymentTransactions', function ($pq) use ($selectedYearId, $currentSppIndex) {
+                    $pq->where('academic_year_id', $selectedYearId)
+                       ->whereHas('paymentDetails', fn($dq) => $dq->where('type', 'SPP')->where('month_index', $currentSppIndex));
+                })->count();
+            $sppPaymentRate = $totalStudentsCount > 0 ? round(($paidSppCount / $totalStudentsCount) * 100) : 0;
+        }
+
+        // ── Arrears Calculation ───────────────────────────────────────────
+        $activeEnrollments = $studentQuery->with(['studentAnnualFees', 'student', 'studentGroup'])->get();
+        $totalArrears  = 0.00;
         $attentionList = [];
 
         foreach ($activeEnrollments as $enr) {
-            $annualArrears = 0.00;
-            foreach ($enr->studentAnnualFees as $fee) {
-                if (!$fee->is_excluded) {
-                    $annualArrears += $fee->balance;
-                }
-            }
+            $annualArrears = collect($enr->studentAnnualFees)->where('is_excluded', false)->sum('balance');
 
-            // Calculate paid SPP months
             $paidSppMonths = PaymentDetail::where('type', 'SPP')
-                ->whereHas('paymentTransaction', function ($q) use ($enr, $selectedYearId) {
-                    $q->where('student_id', $enr->student_id)
-                      ->where('academic_year_id', $selectedYearId);
-                })
-                ->pluck('month_index')
-                ->toArray();
+                ->whereHas('paymentTransaction', fn($q) => $q->where('student_id', $enr->student_id)->where('academic_year_id', $selectedYearId))
+                ->pluck('month_index')->toArray();
 
             $sppArrears = 0.00;
-            // SPP stays normal, no discount applied
-            $discountedSpp = $baseSppAmount;
-
             for ($m = 2; $m <= $currentSppIndex; $m++) {
-                if (!in_array($m, $paidSppMonths)) {
-                    $sppArrears += $discountedSpp;
-                }
+                if (!in_array($m, $paidSppMonths)) $sppArrears += $baseSppAmount;
             }
 
-            $studentTotalArrears = $annualArrears + $sppArrears;
-            $totalArrears += $studentTotalArrears;
+            $studentArrears = $annualArrears + $sppArrears;
+            $totalArrears  += $studentArrears;
 
-            if ($studentTotalArrears > 0) {
+            if ($studentArrears > 0) {
                 $attentionList[] = [
                     'student_id' => $enr->student->id,
-                    'name' => $enr->student->name,
-                    'group_name' => $enr->studentGroup->name,
-                    'amount' => $studentTotalArrears,
+                    'name'       => $enr->student->name,
+                    'group_name' => optional($enr->studentGroup)->name ?? '-',
+                    'amount'     => $studentArrears,
                 ];
             }
         }
 
-        // Sort and get top 5 for "Perhatian Khusus"
-        usort($attentionList, function ($a, $b) {
-            return $b['amount'] <=> $a['amount'];
-        });
+        usort($attentionList, fn($a, $b) => $b['amount'] <=> $a['amount']);
         $attentionList = array_slice($attentionList, 0, 5);
+        $maxArrears    = count($attentionList) > 0 ? $attentionList[0]['amount'] : 1;
 
-        // 6. Chart Trends: Monthly Cash Flow (July to June)
-        // Array maps: July=7, Aug=8, ..., Jun=6
+        // Collection Rate
+        $totalPotentialIncome = $totalIncome + $totalArrears;
+        $collectionRate       = $totalPotentialIncome > 0 ? round(($totalIncome / $totalPotentialIncome) * 100, 1) : 100;
+        $arrearsRatio         = $totalPotentialIncome > 0 ? round(($totalArrears / $totalPotentialIncome) * 100, 1) : 0;
+
+        // ── Monthly Chart (Academic Year: Jul–Jun) ─────────────────────────
         $academicMonths = [7, 8, 9, 10, 11, 12, 1, 2, 3, 4, 5, 6];
-        $monthlyIncome = [];
+        $monthLabels    = ['Jul', 'Agt', 'Sep', 'Okt', 'Nov', 'Des', 'Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun'];
+        $monthlyIncome  = [];
         $monthlyOutcome = [];
+        $monthlyNet     = [];
 
         $startYear = (int) $selectedYear->start_date->format('Y');
-        $endYear = (int) $selectedYear->end_date->format('Y');
+        $endYear   = (int) $selectedYear->end_date->format('Y');
 
         foreach ($academicMonths as $month) {
-            $year = ($month >= 7) ? $startYear : $endYear;
-            
-            // Calculate income for this month
-            // Scoped to Level/Group if filtered
-            $mIncome = (float) $incomeQuery->clone()
-                ->whereYear('date', $year)
-                ->whereMonth('date', $month)
-                ->sum('total_amount');
-
-            // Calculate expense for this month
-            $mOutcome = (float) Expense::where('academic_year_id', $selectedYearId)
-                ->whereYear('date', $year)
-                ->whereMonth('date', $month)
-                ->sum('amount');
-
-            $monthlyIncome[] = $mIncome;
-            $monthlyOutcome[] = $mOutcome;
+            $year  = ($month >= 7) ? $startYear : $endYear;
+            $mInc  = (float) $incomeQuery->clone()->whereYear('date', $year)->whereMonth('date', $month)->sum('total_amount');
+            $mExp  = (float) Expense::where('academic_year_id', $selectedYearId)->whereYear('date', $year)->whereMonth('date', $month)->sum('amount');
+            $monthlyIncome[]  = $mInc;
+            $monthlyOutcome[] = $mExp;
+            $monthlyNet[]     = $mInc - $mExp;
         }
 
-        // 7. Recent Transactions (Payments & Expenses combined)
-        // Load recent payments
+        // ── Recent Transactions ───────────────────────────────────────────
         $recentPayments = PaymentTransaction::where('academic_year_id', $selectedYearId)
-            ->with('student')
-            ->orderBy('date', 'desc')
-            ->orderBy('created_at', 'desc')
-            ->limit(5)
-            ->get()
-            ->map(function ($item) {
-                return [
-                    'date' => $item->date,
-                    'type' => 'Pemasukan',
-                    'description' => "Pembayaran siswa: " . $item->student->name,
-                    'amount' => $item->total_amount,
-                    'route' => route('payments.show', $item->id),
-                ];
-            });
+            ->with('student')->orderByDesc('date')->orderByDesc('created_at')->limit(6)->get()
+            ->map(fn($item) => [
+                'date'        => $item->date,
+                'type'        => 'Pemasukan',
+                'description' => $item->student->name,
+                'amount'      => $item->total_amount,
+                'route'       => route('payments.show', $item->id),
+            ]);
 
-        // Load recent expenses
         $recentExpenses = Expense::where('academic_year_id', $selectedYearId)
-            ->with('expenseCategory')
-            ->orderBy('date', 'desc')
-            ->orderBy('created_at', 'desc')
-            ->limit(5)
-            ->get()
-            ->map(function ($item) {
-                return [
-                    'date' => $item->date,
-                    'type' => 'Pengeluaran',
-                    'description' => "[{$item->expenseCategory->name}] " . ($item->notes ?? 'Operasional'),
-                    'amount' => $item->amount,
-                    'route' => route('expenses.index'),
-                ];
-            });
+            ->with('expenseCategory')->orderByDesc('date')->orderByDesc('created_at')->limit(6)->get()
+            ->map(fn($item) => [
+                'date'        => $item->date,
+                'type'        => 'Pengeluaran',
+                'description' => optional($item->expenseCategory)->name . ': ' . ($item->notes ?? 'Operasional'),
+                'amount'      => $item->amount,
+                'route'       => route('expenses.index'),
+            ]);
 
         $recentTransactions = $recentPayments->concat($recentExpenses)->sortByDesc('date')->values()->all();
 
-        // 8. Quick Metrics
-        $totalStudentsCount = (int) $studentQuery->clone()->count();
-        $discountedStudentsCount = (int) $studentQuery->clone()->whereNotNull('discount_category_id')->count();
-
-        // SPP Payment Rate for the current month
-        $paidSppCount = 0;
-        if ($currentSppIndex >= 2) {
-            $paidSppCount = StudentEnrollment::where('academic_year_id', $selectedYearId)
-                ->whereHas('student', function ($q) {
-                    $q->where('status', 'Active');
-                })
-                ->when($request->filled('level_id'), function ($q) use ($request) {
-                    $q->whereHas('studentGroup', function ($sg) use ($request) {
-                        $sg->where('level_id', $request->level_id);
-                    });
-                })
-                ->when($request->filled('student_group_id'), function ($q) use ($request) {
-                    $q->where('student_group_id', $request->student_group_id);
-                })
-                ->whereHas('student.paymentTransactions', function ($pq) use ($selectedYearId, $currentSppIndex) {
-                    $pq->where('academic_year_id', $selectedYearId)
-                       ->whereHas('paymentDetails', function ($dq) use ($currentSppIndex) {
-                           $dq->where('type', 'SPP')
-                              ->where('month_index', $currentSppIndex);
-                       });
-                })
-                ->count();
-            $sppPaymentRate = $totalStudentsCount > 0 ? round(($paidSppCount / $totalStudentsCount) * 100) : 0;
-        } else {
-            $sppPaymentRate = 100;
-        }
-
-        $monthNames = [
-            1 => 'Juli', 2 => 'Agustus', 3 => 'September', 4 => 'Oktober', 5 => 'November', 6 => 'Desember',
-            7 => 'Januari', 8 => 'Februari', 9 => 'Maret', 10 => 'April', 11 => 'Mei', 12 => 'Juni'
-        ];
-        $currentMonthName = $monthNames[$currentSppIndex] ?? 'Juli';
-
-        // 9. Expense Distribution by Category
+        // ── Expense Distribution ──────────────────────────────────────────
         $expenseDistribution = Expense::where('academic_year_id', $selectedYearId)
             ->join('expense_categories', 'expenses.expense_category_id', '=', 'expense_categories.id')
             ->select('expense_categories.name as category_name', DB::raw('SUM(expenses.amount) as total_amount'))
-            ->groupBy('expense_categories.name')
-            ->get();
+            ->groupBy('expense_categories.name')->get();
 
         $expenseLabels = $expenseDistribution->pluck('category_name')->toArray();
-        $expenseValues = $expenseDistribution->pluck('total_amount')->map(function ($val) {
-            return (float) $val;
-        })->toArray();
+        $expenseValues = $expenseDistribution->pluck('total_amount')->map(fn($v) => (float) $v)->toArray();
 
         return view('dashboard', compact(
-            'currentBalance',
-            'totalIncome',
-            'totalOutcome',
-            'totalArrears',
-            'attentionList',
-            'monthlyIncome',
-            'monthlyOutcome',
+            'currentBalance', 'totalIncome', 'totalOutcome', 'totalArrears',
+            'todayIncome', 'thisMonthIncome', 'thisMonthOutcome', 'thisMonthNet',
+            'collectionRate', 'arrearsRatio', 'totalPotentialIncome',
+            'attentionList', 'maxArrears',
+            'monthlyIncome', 'monthlyOutcome', 'monthlyNet', 'monthLabels',
             'recentTransactions',
-            'levels',
             'selectedYear',
-            'totalStudentsCount',
-            'discountedStudentsCount',
-            'sppPaymentRate',
-            'currentMonthName',
-            'expenseLabels',
-            'expenseValues'
+            'totalStudentsCount', 'discountedStudentsCount',
+            'sppPaymentRate', 'currentMonthName',
+            'expenseLabels', 'expenseValues',
+            'paidSppCount'
         ));
     }
 }

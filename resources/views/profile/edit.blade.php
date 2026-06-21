@@ -64,7 +64,17 @@
 
                 <div class="d-flex align-items-center justify-content-between">
                     <div>
-                        <span class="badge bg-secondary py-2 px-3">Hak Akses: {{ $user->isAdmin() ? 'Administrator' : 'Guru / Staf' }}</span>
+                        @if($user->isSuperAdmin())
+                            <span class="badge bg-dark py-2 px-3">Hak Akses: Admin Utama</span>
+                        @elseif($user->isHeadmaster())
+                            <span class="badge bg-primary py-2 px-3">Hak Akses: Kepala Sekolah</span>
+                        @elseif($user->role === 'finance_admin')
+                            <span class="badge bg-success py-2 px-3">Hak Akses: Admin Keuangan</span>
+                        @elseif($user->role === 'savings_admin')
+                            <span class="badge bg-info text-dark py-2 px-3">Hak Akses: Admin Tabungan</span>
+                        @else
+                            <span class="badge bg-secondary py-2 px-3">Hak Akses: Guru / Staf</span>
+                        @endif
                     </div>
                     @if (!$user->isTeacher())
                         <button type="submit" class="btn btn-primary-custom btn-sm px-4">Simpan Profil</button>

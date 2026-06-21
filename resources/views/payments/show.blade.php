@@ -24,7 +24,7 @@
                 </div>
                 <div class="col-10">
                     <h5 class="mb-0 font-weight-700 text-teal">PAUD AL MARJAN</h5>
-                    <p class="helper-text mb-0" style="font-size: 0.75rem;">Jl. Raya Al Marjan No. 12, Kelapa Dua, Tangerang</p>
+                    <p class="helper-text mb-0" style="font-size: 0.75rem;">Permata Depok Regency Ratujaya</p>
                     <span class="small font-weight-600 text-muted">KUITANSI PEMBAYARAN RESMI</span>
                 </div>
             </div>

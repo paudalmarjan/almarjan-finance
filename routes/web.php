@@ -11,13 +11,18 @@ use App\Http\Controllers\SettingController;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Artisan;
 
-// Redirect / to dashboard
-Route::redirect('/', '/dashboard');
+use App\Http\Controllers\PortalController;
+
+// Redirect / to portal
+Route::redirect('/', '/portal');
 
 // Auth protected routes
 Route::middleware(['auth', 'verified'])->group(function () {
     
-    // Dashboard
+    // Portal Hub
+    Route::get('/portal', [PortalController::class, 'index'])->name('portal');
+
+    // Dashboard (App Keuangan)
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
 
     // Profile Settings
@@ -53,6 +58,15 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/reports/arrears', [ReportController::class, 'arrears'])->name('reports.arrears');
     Route::get('/reports/lpj', [ReportController::class, 'lpj'])->name('reports.lpj');
     Route::post('/reports/lpj/export', [ReportController::class, 'exportLpj'])->name('reports.export-lpj');
+
+    // Savings (Tabungan Siswa)
+    Route::get('/savings', [App\Http\Controllers\StudentSavingsController::class, 'index'])->name('savings.index');
+    Route::get('/savings/students', [App\Http\Controllers\StudentSavingsController::class, 'students'])->name('savings.students');
+    Route::get('/savings/deposit', [App\Http\Controllers\StudentSavingsController::class, 'deposit'])->name('savings.deposit');
+    Route::get('/savings/withdraw', [App\Http\Controllers\StudentSavingsController::class, 'withdraw'])->name('savings.withdraw');
+    Route::post('/savings/bulk', [App\Http\Controllers\StudentSavingsController::class, 'storeBulk'])->name('savings.store-bulk');
+    Route::get('/savings/history', [App\Http\Controllers\StudentSavingsController::class, 'history'])->name('savings.history');
+    Route::get('/savings/transaction/{transaction}/print', [App\Http\Controllers\StudentSavingsController::class, 'print'])->name('savings.print');
 
     // Admin Only Routes
     Route::middleware('admin')->group(function () {
