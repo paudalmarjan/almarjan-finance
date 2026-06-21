@@ -16,6 +16,11 @@ use App\Http\Controllers\PortalController;
 // Redirect / to portal
 Route::redirect('/', '/portal');
 
+// Public ping route for uptime monitoring
+Route::get('/ping', function () {
+    return 'pong';
+});
+
 // Auth protected routes
 Route::middleware(['auth', 'verified'])->group(function () {
     
