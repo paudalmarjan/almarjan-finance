@@ -7,6 +7,17 @@
     <h5 class="mb-0 font-weight-600">Bukti Pembayaran Resmi</h5>
     <div>
         <a href="{{ route('payments.index') }}" class="btn btn-light btn-sm me-2"><i class="bi bi-arrow-left"></i> Riwayat</a>
+        
+        @if(auth()->user()->isSuperAdmin())
+        <form action="{{ route('payments.destroy', $transaction->id) }}" method="POST" class="d-inline" onsubmit="return confirm('Apakah Anda yakin ingin membatalkan dan menghapus transaksi pembayaran ini? Sisa tagihan siswa akan otomatis dipulihkan.')">
+            @csrf
+            @method('DELETE')
+            <button type="submit" class="btn btn-outline-danger btn-sm me-2">
+                <i class="bi bi-trash me-1"></i> Batalkan Pembayaran
+            </button>
+        </form>
+        @endif
+
         <a href="{{ route('payments.print', $transaction->id) }}" target="_blank" class="btn btn-primary-custom btn-sm">
             <i class="bi bi-printer me-1"></i> Cetak Kuitansi
         </a>

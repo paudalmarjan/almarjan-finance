@@ -309,4 +309,25 @@ class PaymentController extends Controller
 
         return view('payments.print', compact('transaction', 'enrollment'));
     }
+
+    public function destroy(PaymentTransaction $transaction)
+    {
+        if (!auth()->user()->isSuperAdmin()) {
+            abort(403, 'Akses Ditolak: Hanya Administrator Utama yang dapat menghapus transaksi pembayaran.');
+        }
+
+        try {
+            DB::transaction(function () use ($transaction) {
+                // Delete associated payment details
+                $transaction->paymentDetails()->delete();
+                
+                // Delete the transaction header
+                $transaction->delete();
+            });
+
+            return redirect()->route('payments.index')->with('success', 'Transaksi pembayaran berhasil dibatalkan dan dihapus. Sisa tagihan siswa telah dipulihkan.');
+        } catch (\Exception $e) {
+            return redirect()->back()->with('error', 'Terjadi kesalahan saat menghapus pembayaran: ' . $e->getMessage());
+        }
+    }
 }

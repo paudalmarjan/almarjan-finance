@@ -118,11 +118,17 @@
                     <div class="col-md-7 px-0">
                         <label for="auto_allocation_amount" class="form-label small font-weight-600 mb-1 text-teal">Alokasi Pembayaran Cepat (FIFO)</label>
                         <p class="helper-text mb-0" style="font-size: 0.75rem;">Masukkan total nominal pembayaran di sini. Sistem akan otomatis membagi ke komponen di bawah dari atas ke bawah.</p>
+                        <span class="badge bg-secondary-subtle text-secondary border mt-2 small" style="font-size: 0.72rem; font-weight: 500;">
+                            Total Sisa Tagihan Tahunan: <strong class="text-teal">Rp {{ number_format($annualFees->where('is_excluded', false)->sum('balance'), 0, ',', '.') }}</strong>
+                        </span>
                     </div>
                     <div class="col-md-5 px-0">
                         <div class="input-group">
                             <span class="input-group-text">Rp</span>
                             <input type="number" class="form-control" id="auto_allocation_amount" placeholder="Ketik total nominal..." oninput="distributeAmountFIFO(this.value)">
+                        </div>
+                        <div class="text-danger small mt-1 d-none" id="fifo_excess_warning" style="font-weight: 500;">
+                            <i class="bi bi-exclamation-triangle-fill"></i> Melebihi total sisa tagihan (Rp <span id="fifo_max_amount">0</span>)! Selisih Rp <span id="fifo_excess_amount">0</span> tidak teralokasi.
                         </div>
                     </div>
                 </div>
@@ -170,7 +176,7 @@
                                                data-balance="{{ $fee->balance }}"
                                                data-name="{{ $fee->annualFeeComponent->name }}"
                                                value="0" min="0" max="{{ $fee->balance }}" 
-                                               oninput="calculateTotal()">
+                                               oninput="clearFIFOAndCalculate()">
                                         <div class="text-danger small mt-1 text-end d-none" id="err_{{ $fee->id }}">Melebihi sisa tagihan!</div>
                                     @endif
                                 </td>
@@ -285,6 +291,18 @@
         }
     }
 
+    function clearFIFOAndCalculate() {
+        var autoAllocInput = document.getElementById('auto_allocation_amount');
+        if (autoAllocInput) {
+            autoAllocInput.value = '';
+        }
+        var warningDiv = document.getElementById('fifo_excess_warning');
+        if (warningDiv) {
+            warningDiv.classList.add('d-none');
+        }
+        calculateTotal();
+    }
+
     function calculateTotal() {
         var total = 0;
         var hasValidationError = false;
@@ -318,6 +336,22 @@
         var checkedSpp = document.querySelectorAll('.spp-checkbox:checked').length;
         total += (checkedSpp * monthlySpp);
 
+        // Check if there is an excess in FIFO allocation
+        var autoAllocInput = document.getElementById('auto_allocation_amount');
+        if (autoAllocInput && autoAllocInput.value !== '') {
+            var autoAllocVal = parseFloat(autoAllocInput.value) || 0;
+            var totalSisaAnnual = 0;
+            for (var i = 0; i < annualInputs.length; i++) {
+                var input = annualInputs[i];
+                if (!input.disabled) {
+                    totalSisaAnnual += parseFloat(input.getAttribute('data-balance')) || 0;
+                }
+            }
+            if (autoAllocVal > totalSisaAnnual) {
+                hasValidationError = true;
+            }
+        }
+
         // 3. Display formatted total
         document.getElementById('total_display').innerText = 'Rp ' + total.toLocaleString('id-ID');
         
@@ -343,7 +377,36 @@
 
         var inputs = document.getElementsByClassName('annual-payment-input');
         var remaining = totalPayable;
+        var totalSisa = 0;
 
+        // Calculate total sisa
+        for (var i = 0; i < inputs.length; i++) {
+            var input = inputs[i];
+            if (input.disabled) continue;
+            var balance = parseFloat(input.getAttribute('data-balance')) || 0;
+            totalSisa += balance;
+        }
+
+        // Handle warning display
+        var warningDiv = document.getElementById('fifo_excess_warning');
+        var excessSpan = document.getElementById('fifo_excess_amount');
+        var maxSpan = document.getElementById('fifo_max_amount');
+        if (totalPayable > totalSisa) {
+            var excess = totalPayable - totalSisa;
+            if (warningDiv && excessSpan) {
+                warningDiv.classList.remove('d-none');
+                excessSpan.innerText = excess.toLocaleString('id-ID');
+                if (maxSpan) {
+                    maxSpan.innerText = totalSisa.toLocaleString('id-ID');
+                }
+            }
+        } else {
+            if (warningDiv) {
+                warningDiv.classList.add('d-none');
+            }
+        }
+
+        // Distribute up to balance
         for (var i = 0; i < inputs.length; i++) {
             var input = inputs[i];
             if (input.disabled) continue;
