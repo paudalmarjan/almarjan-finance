@@ -86,7 +86,7 @@
                             <th>Jenis Mutasi</th>
                             <th class="text-end">Nominal (Rp)</th>
                             <th>Oleh</th>
-                            <th class="text-center">Cetak</th>
+                            <th class="text-center" style="width: 100px;">Aksi</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -118,9 +118,20 @@
                                 <small class="text-muted" style="font-size: 0.65rem;">TA: {{ $trx->academicYear->name }}</small>
                             </td>
                             <td class="text-center">
-                                <a href="{{ route('savings.print', $trx->id) }}" target="_blank" class="btn btn-sm btn-outline-secondary" title="Cetak Bukti">
-                                    <i class="bi bi-printer"></i>
-                                </a>
+                                <div class="d-flex gap-1 justify-content-center">
+                                    <a href="{{ route('savings.print', $trx->id) }}" target="_blank" class="btn btn-sm btn-outline-secondary" title="Cetak Bukti">
+                                        <i class="bi bi-printer"></i>
+                                    </a>
+                                    @if(auth()->user()->isSuperAdmin() && $trx->academicYear->is_active)
+                                        <form action="{{ route('savings.destroy', $trx->id) }}" method="POST" onsubmit="return confirm('Apakah Anda yakin ingin membatalkan dan menghapus transaksi ini? Tindakan ini akan mengoreksi saldo tabungan siswa.')" style="display:inline;">
+                                            @csrf
+                                            @method('DELETE')
+                                            <button type="submit" class="btn btn-sm btn-outline-danger" title="Batal Transaksi">
+                                                <i class="bi bi-trash"></i>
+                                            </button>
+                                        </form>
+                                    @endif
+                                </div>
                             </td>
                         </tr>
                         @empty

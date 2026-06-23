@@ -296,4 +296,45 @@ class StudentSavingsController extends Controller
         $transaction->load(['student', 'user']);
         return view('savings.print', compact('transaction'));
     }
+
+    public function destroy(StudentSavingsTransaction $transaction)
+    {
+        if (!auth()->user()->isSuperAdmin()) {
+            abort(403, 'Akses Ditolak: Hanya Administrator Utama yang dapat menghapus transaksi tabungan.');
+        }
+
+        $academicYear = $transaction->academicYear;
+        if (!$academicYear || !$academicYear->is_active) {
+            return redirect()->back()->with('error', 'Akses Ditolak: Transaksi di luar Tahun Ajaran aktif tidak dapat dihapus/dibatalkan.');
+        }
+
+        try {
+            DB::transaction(function () use ($transaction) {
+                // Find student saving record
+                $saving = StudentSaving::where('student_id', $transaction->student_id)->first();
+                
+                if ($saving) {
+                    // Correct the student's balance
+                    if ($transaction->type === 'Deposit') {
+                        // Deleting a deposit means subtracting the amount from the balance
+                        if ($saving->balance < $transaction->amount) {
+                            throw new \Exception("Tidak dapat menghapus setoran. Saldo akhir siswa saat ini (Rp " . number_format($saving->balance, 0, ',', '.') . ") lebih kecil dari jumlah setoran yang ingin dibatalkan (Rp " . number_format($transaction->amount, 0, ',', '.') . ").");
+                        }
+                        $saving->balance -= $transaction->amount;
+                    } else {
+                        // Deleting a withdrawal means adding the amount back to the balance
+                        $saving->balance += $transaction->amount;
+                    }
+                    $saving->save();
+                }
+
+                // Delete the transaction record
+                $transaction->delete();
+            });
+
+            return redirect()->back()->with('success', 'Transaksi tabungan berhasil dibatalkan dan dihapus. Saldo siswa telah dikoreksi.');
+        } catch (\Exception $e) {
+            return redirect()->back()->with('error', 'Terjadi kesalahan saat membatalkan transaksi: ' . $e->getMessage());
+        }
+    }
 }

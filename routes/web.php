@@ -78,6 +78,9 @@ Route::middleware(['auth', 'verified'])->group(function () {
         // Cancel / Delete Payment Transaction (Hanya Admin Utama)
         Route::delete('/payments/{transaction}', [PaymentController::class, 'destroy'])->name('payments.destroy');
 
+        // Cancel / Delete Savings Transaction (Hanya Admin Utama)
+        Route::delete('/savings/transaction/{transaction}', [App\Http\Controllers\StudentSavingsController::class, 'destroy'])->name('savings.destroy');
+
         // Cancel Student Enrollment (Tahun Ajaran Inaktif)
         Route::delete('/students/{student}/cancel-enrollment', [StudentController::class, 'cancelEnrollment'])->name('students.cancel-enrollment');
 
