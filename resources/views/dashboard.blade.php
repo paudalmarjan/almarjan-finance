@@ -117,14 +117,24 @@
             </div>
             <div>
                 <p class="text-muted mb-1" style="font-size:.72rem; font-weight:700; text-transform:uppercase; letter-spacing:.05em;">Kelancaran SPP</p>
-                <h4 class="mb-1 fw-bold" style="font-size:1.2rem; color:#8b5cf6;">{{ $sppPaymentRate }}%</h4>
-                <div class="progress" style="height:4px; background:rgba(139,92,246,0.15);">
-                    <div class="progress-bar" style="width:{{ $sppPaymentRate }}%; background:#8b5cf6;"></div>
-                </div>
-                <small class="text-muted" style="font-size:.68rem;">{{ $paidSppCount }}/{{ $totalStudentsCount }} siswa lunas bulan ini</small>
+                @if($currentSppIndex === 1)
+                    {{-- Juli: SPP bundled in annual fee, no individual tracking --}}
+                    <h4 class="mb-1 fw-bold" style="font-size:1.1rem; color:#8b5cf6;">Ter-bundle</h4>
+                    <div class="progress" style="height:4px; background:rgba(139,92,246,0.15);">
+                        <div class="progress-bar" style="width:100%; background:rgba(139,92,246,0.3);"></div>
+                    </div>
+                    <small class="text-muted" style="font-size:.68rem;">SPP Juli sudah ter-bundel dalam<br>Biaya Tahunan siswa.</small>
+                @else
+                    <h4 class="mb-1 fw-bold" style="font-size:1.2rem; color:#8b5cf6;">{{ $sppPaymentRate }}%</h4>
+                    <div class="progress" style="height:4px; background:rgba(139,92,246,0.15);">
+                        <div class="progress-bar" style="width:{{ $sppPaymentRate }}%; background:#8b5cf6;"></div>
+                    </div>
+                    <small class="text-muted" style="font-size:.68rem;">{{ $paidSppCount }}/{{ $totalStudentsCount }} siswa lunas bulan ini</small>
+                @endif
             </div>
         </div>
     </div>
+
 </div>
 
 {{-- ═══════════════════════════════════════════════════════════════

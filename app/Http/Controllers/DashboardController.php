@@ -175,7 +175,7 @@ class DashboardController extends Controller
             'recentTransactions',
             'selectedYear',
             'totalStudentsCount', 'discountedStudentsCount',
-            'sppPaymentRate', 'currentMonthName',
+            'sppPaymentRate', 'currentMonthName', 'currentSppIndex',
             'expenseLabels', 'expenseValues',
             'paidSppCount'
         ));
