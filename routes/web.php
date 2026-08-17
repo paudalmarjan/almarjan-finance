@@ -12,6 +12,9 @@ use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Artisan;
 
 use App\Http\Controllers\PortalController;
+use App\Http\Controllers\GeneralIncomeController;
+use App\Http\Controllers\ParentAuthController;
+use App\Http\Controllers\ParentPortalController;
 
 // Redirect / to portal
 Route::redirect('/', '/portal');
@@ -19,6 +22,20 @@ Route::redirect('/', '/portal');
 // Public ping route for uptime monitoring
 Route::get('/ping', function () {
     return 'pong';
+});
+
+// Parent Portal Routes
+Route::prefix('wali')->name('wali.')->group(function () {
+    Route::get('/login', [ParentAuthController::class, 'showLogin'])->name('login');
+    Route::post('/login', [ParentAuthController::class, 'login'])->name('login.post');
+    Route::post('/logout', [ParentAuthController::class, 'logout'])->name('logout');
+    
+    // Protected Parent Routes
+    Route::middleware([\App\Http\Middleware\ParentPortalMiddleware::class])->group(function () {
+        Route::get('/', [ParentPortalController::class, 'index'])->name('dashboard');
+        Route::get('/ganti-pin', [ParentPortalController::class, 'showChangePin'])->name('change-pin');
+        Route::post('/ganti-pin', [ParentPortalController::class, 'updatePin'])->name('change-pin.post');
+    });
 });
 
 // Auth protected routes
@@ -47,6 +64,12 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/expenses/create', [ExpenseController::class, 'create'])->name('expenses.create');
     Route::post('/expenses', [ExpenseController::class, 'store'])->name('expenses.store');
     Route::delete('/expenses/{expense}', [ExpenseController::class, 'destroy'])->name('expenses.destroy');
+
+    // General Incomes (Pemasukan Lain-lain)
+    Route::get('/incomes', [GeneralIncomeController::class, 'index'])->name('incomes.index');
+    Route::get('/incomes/create', [GeneralIncomeController::class, 'create'])->name('incomes.create');
+    Route::post('/incomes', [GeneralIncomeController::class, 'store'])->name('incomes.store');
+    Route::delete('/incomes/{income}', [GeneralIncomeController::class, 'destroy'])->name('incomes.destroy');
 
     // Students (Daftar Siswa)
     Route::get('/students/search-ajax', [StudentController::class, 'searchAjax'])->name('students.search-ajax');
@@ -84,6 +107,9 @@ Route::middleware(['auth', 'verified'])->group(function () {
         // Cancel Student Enrollment (Tahun Ajaran Inaktif)
         Route::delete('/students/{student}/cancel-enrollment', [StudentController::class, 'cancelEnrollment'])->name('students.cancel-enrollment');
 
+        // Reset Parent PIN (Hanya Admin)
+        Route::post('/students/{student}/reset-pin', [StudentController::class, 'resetPin'])->name('students.reset-pin');
+
         // Promotions (Kenaikan Kelas)
         Route::get('/promotions', [PromotionController::class, 'index'])->name('promotions.index');
         Route::post('/promotions', [PromotionController::class, 'store'])->name('promotions.store');
@@ -111,6 +137,9 @@ Route::middleware(['auth', 'verified'])->group(function () {
         
         Route::post('/settings/expense-categories', [SettingController::class, 'storeExpenseCategory'])->name('settings.expense-categories.store');
         Route::delete('/settings/expense-categories/{category}', [SettingController::class, 'destroyExpenseCategory'])->name('settings.expense-categories.destroy');
+        
+        Route::post('/settings/income-categories', [SettingController::class, 'storeIncomeCategory'])->name('settings.income-categories.store');
+        Route::delete('/settings/income-categories/{category}', [SettingController::class, 'destroyIncomeCategory'])->name('settings.income-categories.destroy');
         
         Route::post('/settings/users', [SettingController::class, 'storeUser'])->name('settings.users.store');
         Route::delete('/settings/users/{user}', [SettingController::class, 'destroyUser'])->name('settings.users.destroy');

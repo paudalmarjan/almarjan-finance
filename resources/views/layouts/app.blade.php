@@ -15,6 +15,9 @@
 </head>
 <body>
     <div class="layout-wrapper">
+        <!-- Sidebar Overlay for Mobile -->
+        <div class="sidebar-overlay" id="sidebarOverlay" onclick="toggleSidebar()"></div>
+
         <!-- Sidebar -->
         <aside class="sidebar d-flex flex-column align-items-stretch" id="sidebar">
             <div class="d-flex align-items-center justify-content-between px-3 pt-3 pb-2 brand border-bottom" style="border-color: rgba(255, 255, 255, 0.1) !important;">
@@ -33,7 +36,7 @@
                     <span class="ms-1 d-none d-sm-inline">Beranda</span>
                 </a>
                 
-                <div class="sidebar-section-title d-none d-sm-block">Penerimaan</div>
+                <div class="sidebar-section-title d-none d-sm-block">Penerimaan Siswa</div>
                 
                 <a href="{{ route('payments.create') }}" class="nav-link {{ request()->routeIs('payments.create') ? 'active' : '' }}">
                     <i class="bi bi-cash-coin"></i>
@@ -42,6 +45,17 @@
                 <a href="{{ route('payments.index') }}" class="nav-link {{ request()->routeIs('payments.index') && !request()->routeIs('payments.create') ? 'active' : '' }}">
                     <i class="bi bi-receipt"></i>
                     <span class="ms-1 d-none d-sm-inline">Riwayat Transaksi</span>
+                </a>
+
+                <div class="sidebar-section-title d-none d-sm-block">Pemasukan Lainnya</div>
+                
+                <a href="{{ route('incomes.create') }}" class="nav-link {{ request()->routeIs('incomes.create') ? 'active' : '' }}">
+                    <i class="bi bi-journal-plus"></i>
+                    <span class="ms-1 d-none d-sm-inline">Catat Pemasukan</span>
+                </a>
+                <a href="{{ route('incomes.index') }}" class="nav-link {{ request()->routeIs('incomes.index') && !request()->routeIs('incomes.create') ? 'active' : '' }}">
+                    <i class="bi bi-wallet2"></i>
+                    <span class="ms-1 d-none d-sm-inline">Riwayat Pemasukan</span>
                 </a>
 
                 <div class="sidebar-section-title d-none d-sm-block">Pengeluaran</div>
@@ -72,12 +86,12 @@
             </div>
 
             <!-- User Info Sidebar footer -->
-            <div class="dropdown border-top border-secondary mt-auto">
+            <div class="dropdown border-top mt-auto" style="border-color: rgba(255,255,255,0.08) !important;">
                 <a href="#" class="sidebar-user-footer d-flex align-items-center text-white text-decoration-none dropdown-toggle p-3" id="dropdownUser1" data-bs-toggle="dropdown" aria-expanded="false">
-                    <div class="avatar bg-primary text-white rounded-circle d-flex align-items-center justify-content-center me-2 flex-shrink-0" style="width: 32px; height: 32px; font-weight: 600;">
+                    <div class="icon-box icon-box-sm me-2 flex-shrink-0" style="background: var(--primary-color); color: #fff; font-weight: 700; font-size: 0.85rem;">
                         {{ strtoupper(substr(auth()->user()->name, 0, 1)) }}
                     </div>
-                    <span class="user-name-text text-truncate me-1" style="max-width: 120px; overflow: hidden;">{{ auth()->user()->name }}</span>
+                    <span class="text-truncate me-1" style="font-size: var(--text-sm); max-width: 130px;">{{ auth()->user()->name }}</span>
                 </a>
                 <ul class="dropdown-menu dropdown-menu-dark text-small shadow" aria-labelledby="dropdownUser1">
                     <li><a class="dropdown-menu-item dropdown-item" href="{{ route('profile.edit') }}"><i class="bi bi-person me-2"></i> Profil</a></li>
@@ -96,9 +110,18 @@
         <div class="main-content">
             <!-- Top Header Navbar -->
             <header class="top-navbar d-flex align-items-center justify-content-between no-print">
-                <h4 class="mb-0 text-dark font-weight-600 d-none d-md-block">
-                    @yield('title', 'Sistem Keuangan Al Marjan')
-                </h4>
+                <div class="d-flex align-items-center">
+                    <!-- Mobile Sidebar Toggle -->
+                    <button class="btn btn-outline-secondary btn-sm d-md-none me-3" type="button" onclick="toggleSidebar()" style="border-color: var(--border-default);">
+                        <i class="bi bi-list fs-5"></i>
+                    </button>
+                    <h4 class="mb-0 d-none d-md-block">
+                        @yield('title', 'Sistem Keuangan Al Marjan')
+                    </h4>
+                    <h6 class="mb-0 fw-700 d-md-none text-truncate" style="max-width: 180px;">
+                        @yield('title', 'Keuangan')
+                    </h6>
+                </div>
                 
                 <div class="d-flex align-items-center ms-auto">
                     <!-- App Switcher -->
@@ -116,12 +139,12 @@
                         </ul>
                     </div>
                     <!-- Global Search Input -->
-                    <div class="me-3 d-none d-md-block" style="width: 250px;">
-                        <div class="input-group input-group-sm cursor-pointer" onclick="openGlobalSearchModal()" style="cursor: pointer;">
+                    <div class="me-3 d-none d-lg-block" style="width: 240px;">
+                        <div class="input-group input-group-sm" onclick="openGlobalSearchModal()" style="cursor: pointer;">
                             <span class="input-group-text bg-light border-end-0">
-                                <i class="bi bi-search text-muted"></i>
+                                <i class="bi bi-search text-muted" style="font-size: 0.75rem;"></i>
                             </span>
-                            <input type="text" class="form-control border-start-0 ps-1 bg-light cursor-pointer" placeholder="Cari siswa... (Ctrl+K)" style="cursor: pointer;" readonly>
+                            <input type="text" class="form-control border-start-0 ps-1 bg-light" placeholder="Cari siswa... (Ctrl+K)" style="cursor: pointer; font-size: var(--text-xs);" readonly>
                         </div>
                     </div>
 
@@ -132,7 +155,7 @@
                             <span class="input-group-text bg-light border-end-0">
                                 <i class="bi bi-calendar-event text-primary"></i>
                             </span>
-                            <select class="form-select border-start-0 ps-1" name="change_academic_year_id" onchange="this.form.submit()" style="font-weight: 500;">
+                            <select class="form-select fw-500" name="change_academic_year_id" onchange="this.form.submit()" style="font-size: var(--text-xs);">
                                 @foreach($allAcademicYears as $ay)
                                     <option value="{{ $ay->id }}" {{ $selectedAcademicYear && $selectedAcademicYear->id == $ay->id ? 'selected' : '' }}>
                                         TA: {{ $ay->name }} {{ $ay->is_active ? '(Aktif)' : '' }}
@@ -230,6 +253,16 @@
     </div>
 
     <script>
+        // Sidebar Toggle for Mobile
+        function toggleSidebar() {
+            const sidebar = document.getElementById('sidebar');
+            const overlay = document.getElementById('sidebarOverlay');
+            if(sidebar && overlay) {
+                sidebar.classList.toggle('show');
+                overlay.classList.toggle('show');
+            }
+        }
+
         // Initialize Tom Select on any element with .select2-enable class
         document.addEventListener("DOMContentLoaded", function() {
             document.querySelectorAll('.select2-enable').forEach(function(el) {

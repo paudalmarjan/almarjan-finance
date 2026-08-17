@@ -39,7 +39,7 @@
                 </div>
                 <h5 class="font-weight-700 mb-1">{{ $selectedStudent->name }}</h5>
                 <p class="text-muted mb-2">{{ $selectedStudent->nis }}</p>
-                <span class="badge bg-light text-dark border px-3 py-2">
+                <span class="badge badge-soft-neutral badge-pill px-3 py-2">
                     @php
                         $enrollment = $selectedStudent->enrollments->first();
                         $groupName = $enrollment && $enrollment->studentGroup ? $enrollment->studentGroup->name : '-';
@@ -79,8 +79,8 @@
             </div>
 
             <div class="table-responsive">
-                <table class="table table-hover align-middle">
-                    <thead class="table-light">
+                <table class="table table-clean">
+                    <thead>
                         <tr>
                             <th>Tanggal & No. Ref</th>
                             <th>Jenis Mutasi</th>
@@ -98,11 +98,11 @@
                             </td>
                             <td>
                                 @if($trx->type === 'Deposit')
-                                    <span class="badge bg-success-subtle text-success px-3 py-2 border border-success border-opacity-25 rounded-pill">
+                                    <span class="badge badge-soft-success badge-pill">
                                         <i class="bi bi-box-arrow-in-down me-1"></i> Setoran
                                     </span>
                                 @else
-                                    <span class="badge bg-danger-subtle text-danger px-3 py-2 border border-danger border-opacity-25 rounded-pill">
+                                    <span class="badge badge-soft-danger badge-pill">
                                         <i class="bi bi-box-arrow-up me-1"></i> Penarikan
                                     </span>
                                 @endif
@@ -110,12 +110,12 @@
                                     <small class="d-block mt-1 text-muted"><i class="bi bi-chat-left-text me-1"></i>{{ Str::limit($trx->notes, 30) }}</small>
                                 @endif
                             </td>
-                            <td class="text-end font-weight-600 {{ $trx->type === 'Deposit' ? 'text-success' : 'text-danger' }}">
+                            <td class="text-end font-weight-600 col-amount {{ $trx->type === 'Deposit' ? 'text-success' : 'text-danger' }}">
                                 {{ $trx->type === 'Deposit' ? '+' : '-' }} {{ number_format($trx->amount, 0, ',', '.') }}
                             </td>
                             <td>
                                 <small class="d-block">{{ $trx->user->name ?? 'Sistem' }}</small>
-                                <small class="text-muted" style="font-size: 0.65rem;">TA: {{ $trx->academicYear->name }}</small>
+                                <small class="text-muted text-meta">TA: {{ $trx->academicYear->name }}</small>
                             </td>
                             <td class="text-center">
                                 <div class="d-flex gap-1 justify-content-center">
@@ -136,9 +136,12 @@
                         </tr>
                         @empty
                         <tr>
-                            <td colspan="5" class="text-center py-5 text-muted">
-                                <i class="bi bi-inbox fs-2 d-block mb-2"></i>
-                                Belum ada riwayat transaksi tabungan untuk siswa ini.
+                            <td colspan="5">
+                                <div class="empty-state">
+                                    <i class="bi bi-inbox empty-state-icon"></i>
+                                    <p class="empty-state-title">Belum Ada Transaksi</p>
+                                    <p class="empty-state-text mb-0">Belum ada riwayat transaksi tabungan untuk siswa ini.</p>
+                                </div>
                             </td>
                         </tr>
                         @endforelse

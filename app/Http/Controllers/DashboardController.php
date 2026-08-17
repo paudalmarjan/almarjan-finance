@@ -11,6 +11,7 @@ use App\Models\StudentEnrollment;
 use App\Models\PaymentTransaction;
 use App\Models\PaymentDetail;
 use App\Models\Expense;
+use App\Models\GeneralIncome;
 use App\Models\GlobalSppSetting;
 use Carbon\Carbon;
 
@@ -32,15 +33,25 @@ class DashboardController extends Controller
         $studentQuery = StudentEnrollment::where('academic_year_id', $selectedYearId)
             ->whereHas('student', fn($q) => $q->where('status', 'Active'));
 
-        $incomeQuery = PaymentTransaction::where('academic_year_id', $selectedYearId);
+        $studentIncomeQuery = PaymentTransaction::where('academic_year_id', $selectedYearId);
+        $generalIncomeQuery = GeneralIncome::where('academic_year_id', $selectedYearId);
 
         // ── Core Financials ───────────────────────────────────────────────
-        $totalIncome    = (float) $incomeQuery->sum('total_amount');
+        $totalStudentIncome = (float) $studentIncomeQuery->sum('total_amount');
+        $totalGeneralIncome = (float) $generalIncomeQuery->sum('amount');
+        $totalIncome        = $totalStudentIncome + $totalGeneralIncome;
+
         $totalOutcome   = (float) Expense::where('academic_year_id', $selectedYearId)->sum('amount');
         $currentBalance = (float) $selectedYear->initial_cash_balance + $totalIncome - $totalOutcome;
 
-        $todayIncome      = (float) $incomeQuery->clone()->whereDate('date', $today)->sum('total_amount');
-        $thisMonthIncome  = (float) $incomeQuery->clone()->whereYear('date', $today->year)->whereMonth('date', $today->month)->sum('total_amount');
+        $todayStudentIncome = (float) $studentIncomeQuery->clone()->whereDate('date', $today)->sum('total_amount');
+        $todayGeneralIncome = (float) $generalIncomeQuery->clone()->whereDate('date', $today)->sum('amount');
+        $todayIncome        = $todayStudentIncome + $todayGeneralIncome;
+
+        $thisMonthStudentIncome = (float) $studentIncomeQuery->clone()->whereYear('date', $today->year)->whereMonth('date', $today->month)->sum('total_amount');
+        $thisMonthGeneralIncome = (float) $generalIncomeQuery->clone()->whereYear('date', $today->year)->whereMonth('date', $today->month)->sum('amount');
+        $thisMonthIncome        = $thisMonthStudentIncome + $thisMonthGeneralIncome;
+
         $thisMonthOutcome = (float) Expense::where('academic_year_id', $selectedYearId)->whereYear('date', $today->year)->whereMonth('date', $today->month)->sum('amount');
         $thisMonthNet     = $thisMonthIncome - $thisMonthOutcome;
 
@@ -98,10 +109,12 @@ class DashboardController extends Controller
 
             if ($studentArrears > 0) {
                 $attentionList[] = [
-                    'student_id' => $enr->student->id,
-                    'name'       => $enr->student->name,
-                    'group_name' => optional($enr->studentGroup)->name ?? '-',
-                    'amount'     => $studentArrears,
+                    'student_id'   => $enr->student_id,
+                    'name'         => $enr->student->name,
+                    'group_name'   => optional($enr->studentGroup)->name ?? '-',
+                    'amount'       => $studentArrears,
+                    'annual_amount' => $annualArrears,
+                    'spp_amount'   => $sppArrears,
                 ];
             }
         }
@@ -126,9 +139,11 @@ class DashboardController extends Controller
         $endYear   = (int) $selectedYear->end_date->format('Y');
 
         foreach ($academicMonths as $month) {
-            $year  = ($month >= 7) ? $startYear : $endYear;
-            $mInc  = (float) $incomeQuery->clone()->whereYear('date', $year)->whereMonth('date', $month)->sum('total_amount');
-            $mExp  = (float) Expense::where('academic_year_id', $selectedYearId)->whereYear('date', $year)->whereMonth('date', $month)->sum('amount');
+            $year     = ($month >= 7) ? $startYear : $endYear;
+            $mStudInc = (float) $studentIncomeQuery->clone()->whereYear('date', $year)->whereMonth('date', $month)->sum('total_amount');
+            $mGenInc  = (float) $generalIncomeQuery->clone()->whereYear('date', $year)->whereMonth('date', $month)->sum('amount');
+            $mInc     = $mStudInc + $mGenInc;
+            $mExp     = (float) Expense::where('academic_year_id', $selectedYearId)->whereYear('date', $year)->whereMonth('date', $month)->sum('amount');
             $monthlyIncome[]  = $mInc;
             $monthlyOutcome[] = $mExp;
             $monthlyNet[]     = $mInc - $mExp;
@@ -139,10 +154,20 @@ class DashboardController extends Controller
             ->with('student')->orderByDesc('date')->orderByDesc('created_at')->limit(6)->get()
             ->map(fn($item) => [
                 'date'        => $item->date,
-                'type'        => 'Pemasukan',
+                'type'        => 'Pembayaran Siswa',
                 'description' => $item->student->name,
                 'amount'      => $item->total_amount,
                 'route'       => route('payments.show', $item->id),
+            ]);
+
+        $recentGeneralIncomes = GeneralIncome::where('academic_year_id', $selectedYearId)
+            ->with('incomeCategory')->orderByDesc('date')->orderByDesc('created_at')->limit(6)->get()
+            ->map(fn($item) => [
+                'date'        => $item->date,
+                'type'        => 'Pemasukan Lain',
+                'description' => optional($item->incomeCategory)->name . ' (' . $item->source . ')',
+                'amount'      => $item->amount,
+                'route'       => route('incomes.index'),
             ]);
 
         $recentExpenses = Expense::where('academic_year_id', $selectedYearId)
@@ -155,7 +180,7 @@ class DashboardController extends Controller
                 'route'       => route('expenses.index'),
             ]);
 
-        $recentTransactions = $recentPayments->concat($recentExpenses)->sortByDesc('date')->values()->all();
+        $recentTransactions = $recentPayments->concat($recentGeneralIncomes)->concat($recentExpenses)->sortByDesc('date')->values()->all();
 
         // ── Expense Distribution ──────────────────────────────────────────
         $expenseDistribution = Expense::where('academic_year_id', $selectedYearId)
@@ -167,7 +192,7 @@ class DashboardController extends Controller
         $expenseValues = $expenseDistribution->pluck('total_amount')->map(fn($v) => (float) $v)->toArray();
 
         return view('dashboard', compact(
-            'currentBalance', 'totalIncome', 'totalOutcome', 'totalArrears',
+            'currentBalance', 'totalIncome', 'totalStudentIncome', 'totalGeneralIncome', 'totalOutcome', 'totalArrears',
             'todayIncome', 'thisMonthIncome', 'thisMonthOutcome', 'thisMonthNet',
             'collectionRate', 'arrearsRatio', 'totalPotentialIncome',
             'attentionList', 'maxArrears',

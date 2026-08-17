@@ -7,23 +7,26 @@
 {{-- ═══════════════════════════════════════════════════════════════
      INFO BAR — Tahun Ajaran + Quick Links
      ═══════════════════════════════════════════════════════════════ --}}
-<div class="card-premium px-4 py-3 mb-4 d-flex justify-content-between align-items-center">
+<div class="card-premium px-4 py-3 mb-4 d-flex flex-wrap justify-content-between align-items-center gap-3">
     <div class="d-flex align-items-center gap-2">
         <i class="bi bi-calendar3 text-primary"></i>
-        <span class="fw-semibold text-dark" style="font-size:.88rem;">{{ $selectedYear->name }}</span>
+        <span class="fw-600 text-dark">{{ $selectedYear->name }}</span>
         @if($selectedYear->is_active)
-            <span class="badge rounded-pill" style="background:rgba(16,185,129,0.12); color:#10b981; font-size:.68rem;">Aktif</span>
+            <span class="badge badge-soft-success badge-pill">Aktif</span>
         @else
-            <span class="badge rounded-pill" style="background:rgba(107,114,128,0.12); color:#6b7280; font-size:.68rem;">Tidak Aktif</span>
+            <span class="badge badge-soft-neutral badge-pill">Tidak Aktif</span>
         @endif
-        <span class="text-muted" style="font-size:.78rem;">· Data ditampilkan untuk keseluruhan sekolah</span>
+        <span class="text-meta d-none d-md-inline">· Data ditampilkan untuk keseluruhan sekolah</span>
     </div>
-    <div class="d-flex gap-2">
-        <a href="{{ route('reports.arrears') }}" class="btn btn-sm btn-outline-warning" style="font-size:.75rem;">
-            <i class="bi bi-exclamation-triangle me-1"></i>Lap. Tunggakan
+    <div class="page-header-actions">
+        <a href="{{ route('reports.arrears') }}" class="btn btn-sm btn-outline-warning">
+            <i class="bi bi-exclamation-triangle"></i><span class="d-none d-sm-inline ms-1">Lap. Tunggakan</span>
         </a>
-        <a href="{{ route('payments.create') }}" class="btn btn-sm btn-success" style="font-size:.75rem;">
-            <i class="bi bi-plus-lg me-1"></i>Catat Pembayaran
+        <a href="{{ route('incomes.create') }}" class="btn btn-sm btn-outline-success">
+            <i class="bi bi-journal-plus"></i><span class="d-none d-sm-inline ms-1">Pemasukan Lain</span>
+        </a>
+        <a href="{{ route('payments.create') }}" class="btn btn-sm btn-primary-custom">
+            <i class="bi bi-plus-lg"></i><span class="ms-1">Catat Pembayaran</span>
         </a>
     </div>
 </div>
@@ -37,17 +40,17 @@
     <div class="col-sm-6 col-xl">
         <div class="card-premium p-4 h-100 d-flex flex-column justify-content-between">
             <div class="d-flex justify-content-between align-items-start mb-3">
-                <div style="background:rgba(99,102,241,0.12); color:#6366f1; width:42px; height:42px; border-radius:10px; display:flex; align-items:center; justify-content:center; font-size:1.2rem;">
+                <div class="icon-box icon-box-indigo">
                     <i class="bi bi-bank2"></i>
                 </div>
-                <span class="badge rounded-pill" style="background:rgba(99,102,241,0.1); color:#6366f1; font-size:.68rem;">Saldo Bersih TA</span>
+                <span class="badge badge-soft-indigo badge-pill">Saldo Bersih TA</span>
             </div>
             <div>
-                <p class="text-muted mb-1" style="font-size:.72rem; font-weight:700; text-transform:uppercase; letter-spacing:.05em;">Kas Saat Ini</p>
-                <h4 class="mb-0 fw-bold {{ $currentBalance >= 0 ? 'text-dark' : 'text-danger' }}" style="font-size:1.2rem;">
+                <p class="text-label mb-1">Kas Saat Ini</p>
+                <h4 class="mb-0 fw-700 text-value {{ $currentBalance >= 0 ? 'text-dark' : 'text-danger' }}">
                     Rp {{ number_format($currentBalance, 0, ',', '.') }}
                 </h4>
-                <small class="text-muted" style="font-size:.68rem;">Saldo Awal + Masuk − Keluar</small>
+                <span class="text-meta">Saldo Awal + Masuk − Keluar</span>
             </div>
         </div>
     </div>
@@ -56,15 +59,18 @@
     <div class="col-sm-6 col-xl">
         <div class="card-premium p-4 h-100 d-flex flex-column justify-content-between">
             <div class="d-flex justify-content-between align-items-start mb-3">
-                <div style="background:rgba(16,185,129,0.12); color:#10b981; width:42px; height:42px; border-radius:10px; display:flex; align-items:center; justify-content:center; font-size:1.2rem;">
+                <div class="icon-box icon-box-success">
                     <i class="bi bi-arrow-down-circle-fill"></i>
                 </div>
-                <span class="badge rounded-pill" style="background:rgba(16,185,129,0.1); color:#10b981; font-size:.68rem;">Hari ini: +Rp {{ number_format($todayIncome, 0, ',', '.') }}</span>
+                <span class="badge badge-soft-success badge-pill">Hari ini: +Rp {{ number_format($todayIncome, 0, ',', '.') }}</span>
             </div>
             <div>
-                <p class="text-muted mb-1" style="font-size:.72rem; font-weight:700; text-transform:uppercase; letter-spacing:.05em;">Total Pemasukan</p>
-                <h4 class="mb-0 fw-bold text-success" style="font-size:1.2rem;">Rp {{ number_format($totalIncome, 0, ',', '.') }}</h4>
-                <small class="text-muted" style="font-size:.68rem;">Bulan ini: Rp {{ number_format($thisMonthIncome, 0, ',', '.') }}</small>
+                <p class="text-label mb-1">Total Pemasukan</p>
+                <h4 class="mb-0 fw-700 text-success text-value">Rp {{ number_format($totalIncome, 0, ',', '.') }}</h4>
+                <div class="mt-1 d-flex flex-column">
+                    <span class="text-meta">Siswa: Rp {{ number_format($totalStudentIncome, 0, ',', '.') }} | Non-Siswa: Rp {{ number_format($totalGeneralIncome, 0, ',', '.') }}</span>
+                    <span class="text-meta">Bulan ini: Rp {{ number_format($thisMonthIncome, 0, ',', '.') }}</span>
+                </div>
             </div>
         </div>
     </div>
@@ -73,15 +79,15 @@
     <div class="col-sm-6 col-xl">
         <div class="card-premium p-4 h-100 d-flex flex-column justify-content-between">
             <div class="d-flex justify-content-between align-items-start mb-3">
-                <div style="background:rgba(239,68,68,0.12); color:#ef4444; width:42px; height:42px; border-radius:10px; display:flex; align-items:center; justify-content:center; font-size:1.2rem;">
+                <div class="icon-box icon-box-danger">
                     <i class="bi bi-arrow-up-circle-fill"></i>
                 </div>
-                <span class="badge rounded-pill" style="background:rgba(239,68,68,0.1); color:#ef4444; font-size:.68rem;">Bulan ini: Rp {{ number_format($thisMonthOutcome, 0, ',', '.') }}</span>
+                <span class="badge badge-soft-danger badge-pill">Bulan ini: Rp {{ number_format($thisMonthOutcome, 0, ',', '.') }}</span>
             </div>
             <div>
-                <p class="text-muted mb-1" style="font-size:.72rem; font-weight:700; text-transform:uppercase; letter-spacing:.05em;">Total Pengeluaran</p>
-                <h4 class="mb-0 fw-bold text-danger" style="font-size:1.2rem;">Rp {{ number_format($totalOutcome, 0, ',', '.') }}</h4>
-                <small class="text-muted" style="font-size:.68rem;">Net bulan ini: <span style="color:{{ $thisMonthNet >= 0 ? '#10b981' : '#ef4444' }};">{{ $thisMonthNet >= 0 ? '+' : '' }}Rp {{ number_format($thisMonthNet, 0, ',', '.') }}</span></small>
+                <p class="text-label mb-1">Total Pengeluaran</p>
+                <h4 class="mb-0 fw-700 text-danger text-value">Rp {{ number_format($totalOutcome, 0, ',', '.') }}</h4>
+                <span class="text-meta">Net bulan ini: <span class="{{ $thisMonthNet >= 0 ? 'text-success' : 'text-danger' }} fw-600">{{ $thisMonthNet >= 0 ? '+' : '' }}Rp {{ number_format($thisMonthNet, 0, ',', '.') }}</span></span>
             </div>
         </div>
     </div>
@@ -90,18 +96,18 @@
     <div class="col-sm-6 col-xl">
         <div class="card-premium p-4 h-100 d-flex flex-column justify-content-between">
             <div class="d-flex justify-content-between align-items-start mb-3">
-                <div style="background:rgba(245,158,11,0.12); color:#f59e0b; width:42px; height:42px; border-radius:10px; display:flex; align-items:center; justify-content:center; font-size:1.2rem;">
+                <div class="icon-box icon-box-warning">
                     <i class="bi bi-bullseye"></i>
                 </div>
-                <span class="badge rounded-pill" style="background:rgba(245,158,11,0.1); color:#f59e0b; font-size:.68rem;">Tagihan {{ $arrearsRatio }}%</span>
+                <span class="badge badge-soft-warning badge-pill">Tagihan {{ $arrearsRatio }}%</span>
             </div>
             <div>
-                <p class="text-muted mb-1" style="font-size:.72rem; font-weight:700; text-transform:uppercase; letter-spacing:.05em;">Collection Rate</p>
-                <h4 class="mb-1 fw-bold" style="font-size:1.2rem; color:#f59e0b;">{{ $collectionRate }}%</h4>
-                <div class="progress" style="height:4px; background:rgba(245,158,11,0.15);">
-                    <div class="progress-bar" style="width:{{ $collectionRate }}%; background:#f59e0b;"></div>
+                <p class="text-label mb-1">Collection Rate</p>
+                <h4 class="mb-1 fw-700 text-value" style="color: var(--color-warning-text);">{{ $collectionRate }}%</h4>
+                <div class="progress mb-1" style="height:4px;">
+                    <div class="progress-bar" style="width:{{ $collectionRate }}%; background: var(--color-warning-text);"></div>
                 </div>
-                <small class="text-muted" style="font-size:.68rem;">Tagihan terkumpul vs potensi</small>
+                <span class="text-meta">Tagihan terkumpul vs potensi</span>
             </div>
         </div>
     </div>
@@ -110,26 +116,26 @@
     <div class="col-sm-6 col-xl">
         <div class="card-premium p-4 h-100 d-flex flex-column justify-content-between">
             <div class="d-flex justify-content-between align-items-start mb-3">
-                <div style="background:rgba(139,92,246,0.12); color:#8b5cf6; width:42px; height:42px; border-radius:10px; display:flex; align-items:center; justify-content:center; font-size:1.2rem;">
+                <div class="icon-box icon-box-purple">
                     <i class="bi bi-calendar-check-fill"></i>
                 </div>
-                <span class="badge rounded-pill" style="background:rgba(139,92,246,0.1); color:#8b5cf6; font-size:.68rem;">{{ $currentMonthName }}</span>
+                <span class="badge badge-soft-purple badge-pill">{{ $currentMonthName }}</span>
             </div>
             <div>
-                <p class="text-muted mb-1" style="font-size:.72rem; font-weight:700; text-transform:uppercase; letter-spacing:.05em;">Kelancaran SPP</p>
+                <p class="text-label mb-1">Kelancaran SPP</p>
                 @if($currentSppIndex === 1)
                     {{-- Juli: SPP bundled in annual fee, no individual tracking --}}
-                    <h4 class="mb-1 fw-bold" style="font-size:1.1rem; color:#8b5cf6;">Ter-bundle</h4>
-                    <div class="progress" style="height:4px; background:rgba(139,92,246,0.15);">
+                    <h4 class="mb-1 fw-700 text-value" style="color: var(--color-purple-text);">Ter-bundle</h4>
+                    <div class="progress mb-1" style="height:4px; background:rgba(139,92,246,0.15);">
                         <div class="progress-bar" style="width:100%; background:rgba(139,92,246,0.3);"></div>
                     </div>
-                    <small class="text-muted" style="font-size:.68rem;">SPP Juli sudah ter-bundel dalam<br>Biaya Tahunan siswa.</small>
+                    <span class="text-meta">SPP Juli sudah ter-bundel dalam Biaya Tahunan siswa.</span>
                 @else
-                    <h4 class="mb-1 fw-bold" style="font-size:1.2rem; color:#8b5cf6;">{{ $sppPaymentRate }}%</h4>
-                    <div class="progress" style="height:4px; background:rgba(139,92,246,0.15);">
-                        <div class="progress-bar" style="width:{{ $sppPaymentRate }}%; background:#8b5cf6;"></div>
+                    <h4 class="mb-1 fw-700 text-value" style="color: var(--color-purple-text);">{{ $sppPaymentRate }}%</h4>
+                    <div class="progress mb-1" style="height:4px;">
+                        <div class="progress-bar" style="width:{{ $sppPaymentRate }}%; background: var(--color-purple-text);"></div>
                     </div>
-                    <small class="text-muted" style="font-size:.68rem;">{{ $paidSppCount }}/{{ $totalStudentsCount }} siswa lunas bulan ini</small>
+                    <span class="text-meta">{{ $paidSppCount }}/{{ $totalStudentsCount }} siswa lunas bulan ini</span>
                 @endif
             </div>
         </div>
@@ -143,34 +149,34 @@
 <div class="row g-3 mb-4">
     <div class="col-md-4">
         <div class="card-premium px-4 py-3 d-flex align-items-center gap-3">
-            <div style="background:rgba(6,182,212,0.12); color:#06b6d4; width:40px; height:40px; border-radius:10px; display:flex; align-items:center; justify-content:center; flex-shrink:0;">
+            <div class="icon-box icon-box-sm icon-box-info">
                 <i class="bi bi-people-fill"></i>
             </div>
             <div>
-                <p class="text-muted mb-0" style="font-size:.72rem; font-weight:700; text-transform:uppercase; letter-spacing:.05em;">Siswa Aktif Terdaftar</p>
-                <h5 class="mb-0 fw-bold text-dark">{{ $totalStudentsCount }} <span class="fw-normal text-muted" style="font-size:.85rem;">siswa</span></h5>
+                <p class="text-label mb-0">Siswa Aktif Terdaftar</p>
+                <h5 class="mb-0 fw-700 text-dark">{{ $totalStudentsCount }} <span class="fw-500 text-muted" style="font-size: var(--text-sm);">siswa</span></h5>
             </div>
         </div>
     </div>
     <div class="col-md-4">
         <div class="card-premium px-4 py-3 d-flex align-items-center gap-3">
-            <div style="background:rgba(245,158,11,0.12); color:#f59e0b; width:40px; height:40px; border-radius:10px; display:flex; align-items:center; justify-content:center; flex-shrink:0;">
+            <div class="icon-box icon-box-sm icon-box-warning">
                 <i class="bi bi-tags-fill"></i>
             </div>
             <div>
-                <p class="text-muted mb-0" style="font-size:.72rem; font-weight:700; text-transform:uppercase; letter-spacing:.05em;">Penerima Diskon/Keringanan</p>
-                <h5 class="mb-0 fw-bold text-dark">{{ $discountedStudentsCount }} <span class="fw-normal text-muted" style="font-size:.85rem;">siswa</span></h5>
+                <p class="text-label mb-0">Penerima Diskon/Keringanan</p>
+                <h5 class="mb-0 fw-700 text-dark">{{ $discountedStudentsCount }} <span class="fw-500 text-muted" style="font-size: var(--text-sm);">siswa</span></h5>
             </div>
         </div>
     </div>
     <div class="col-md-4">
         <div class="card-premium px-4 py-3 d-flex align-items-center gap-3">
-            <div style="background:rgba(239,68,68,0.12); color:#ef4444; width:40px; height:40px; border-radius:10px; display:flex; align-items:center; justify-content:center; flex-shrink:0;">
+            <div class="icon-box icon-box-sm icon-box-danger">
                 <i class="bi bi-exclamation-triangle-fill"></i>
             </div>
             <div>
-                <p class="text-muted mb-0" style="font-size:.72rem; font-weight:700; text-transform:uppercase; letter-spacing:.05em;">Total Tagihan Aktif</p>
-                <h5 class="mb-0 fw-bold text-danger">Rp {{ number_format($totalArrears, 0, ',', '.') }}</h5>
+                <p class="text-label mb-0">Total Tagihan Aktif</p>
+                <h5 class="mb-0 fw-700 text-danger tabular-nums">Rp {{ number_format($totalArrears, 0, ',', '.') }}</h5>
             </div>
         </div>
     </div>
@@ -184,8 +190,8 @@
         <div class="card-premium p-4">
             <div class="d-flex justify-content-between align-items-center mb-4">
                 <div>
-                    <h6 class="fw-bold mb-0">Arus Kas Bulanan</h6>
-                    <p class="text-muted mb-0" style="font-size:.75rem;">Pemasukan, Pengeluaran &amp; Net per bulan ({{ $selectedYear->name }})</p>
+                    <h6 class="fw-700 mb-0">Arus Kas Bulanan</h6>
+                    <p class="text-meta mb-0">Pemasukan, Pengeluaran &amp; Net per bulan ({{ $selectedYear->name }})</p>
                 </div>
             </div>
             <div style="height:280px;">
@@ -196,8 +202,8 @@
 
     <div class="col-lg-4">
         <div class="card-premium p-4 h-100">
-            <h6 class="fw-bold mb-1">Distribusi Pengeluaran</h6>
-            <p class="text-muted mb-3" style="font-size:.75rem;">Komposisi per kategori kas keluar</p>
+            <h6 class="fw-700 mb-1">Distribusi Pengeluaran</h6>
+            <p class="text-meta mb-3">Komposisi per kategori kas keluar</p>
             <div style="height:180px; position:relative;" class="mb-3">
                 <canvas id="expenseDonut"></canvas>
             </div>
@@ -206,14 +212,14 @@
                 @foreach($expenseLabels as $i => $label)
                 <div class="d-flex justify-content-between align-items-center">
                     <div class="d-flex align-items-center gap-2">
-                        <span style="width:9px; height:9px; border-radius:50%; background:{{ $palette[$i % count($palette)] }}; flex-shrink:0;"></span>
-                        <span style="font-size:.78rem; font-weight:600;">{{ $label }}</span>
+                        <span style="width:8px; height:8px; border-radius:50%; background:{{ $palette[$i % count($palette)] }}; flex-shrink:0; display:inline-block;"></span>
+                        <span class="text-meta fw-600">{{ $label }}</span>
                     </div>
-                    <span class="fw-bold" style="font-size:.78rem;">Rp {{ number_format($expenseValues[$i] ?? 0, 0, ',', '.') }}</span>
+                    <span class="fw-700 tabular-nums" style="font-size: var(--text-xs);">Rp {{ number_format($expenseValues[$i] ?? 0, 0, ',', '.') }}</span>
                 </div>
                 @endforeach
                 @if(count($expenseLabels) === 0)
-                    <p class="text-muted text-center py-2" style="font-size:.8rem;">Belum ada data pengeluaran.</p>
+                    <p class="text-meta text-center py-2">Belum ada data pengeluaran.</p>
                 @endif
             </div>
         </div>
@@ -228,51 +234,50 @@
         <div class="card-premium p-4 h-100">
             <div class="d-flex justify-content-between align-items-center mb-4">
                 <div>
-                    <h6 class="fw-bold mb-0"><i class="bi bi-clock-history text-primary me-1"></i> Transaksi Keuangan Terbaru</h6>
-                    <p class="text-muted mb-0" style="font-size:.75rem;">Gabungan pemasukan &amp; pengeluaran terkini</p>
+                    <h6 class="fw-700 mb-0"><i class="bi bi-clock-history text-primary me-1"></i> Transaksi Keuangan Terbaru</h6>
+                    <p class="text-meta mb-0">Gabungan pemasukan &amp; pengeluaran terkini</p>
                 </div>
-                <a href="{{ route('payments.create') }}" class="btn btn-sm btn-success">
-                    <i class="bi bi-plus-lg me-1"></i>Bayar
+                <a href="{{ route('payments.create') }}" class="btn btn-sm btn-primary-custom">
+                    <i class="bi bi-plus-lg"></i> Bayar
                 </a>
             </div>
             <div class="table-responsive">
-                <table class="table table-sm align-middle mb-0" style="font-size:.82rem;">
+                <table class="table table-clean mb-0">
                     <thead>
-                        <tr style="border-bottom:2px solid #f3f4f6;">
-                            <th class="text-muted fw-semibold pb-2" style="font-size:.7rem; text-transform:uppercase; letter-spacing:.05em;">Tanggal</th>
-                            <th class="text-muted fw-semibold pb-2" style="font-size:.7rem; text-transform:uppercase; letter-spacing:.05em;">Jenis</th>
-                            <th class="text-muted fw-semibold pb-2" style="font-size:.7rem; text-transform:uppercase; letter-spacing:.05em;">Keterangan</th>
-                            <th class="text-muted fw-semibold pb-2 text-end" style="font-size:.7rem; text-transform:uppercase; letter-spacing:.05em;">Nominal</th>
-                            <th class="text-muted fw-semibold pb-2 text-center" style="font-size:.7rem; text-transform:uppercase; letter-spacing:.05em;">Aksi</th>
+                        <tr>
+                            <th>Tanggal</th>
+                            <th>Jenis</th>
+                            <th>Keterangan</th>
+                            <th class="text-end">Nominal</th>
+                            <th class="text-center">Aksi</th>
                         </tr>
                     </thead>
                     <tbody>
                         @forelse($recentTransactions as $tx)
-                        <tr style="border-bottom:1px solid #f9fafb;">
-                            <td class="py-2 text-muted">{{ \Carbon\Carbon::parse($tx['date'])->format('d/m/y') }}</td>
-                            <td class="py-2">
+                        <tr>
+                            <td class="text-muted">{{ \Carbon\Carbon::parse($tx['date'])->format('d/m/y') }}</td>
+                            <td>
                                 @if($tx['type'] === 'Pemasukan')
-                                    <span class="badge rounded-pill" style="background:rgba(16,185,129,0.1); color:#10b981; font-size:.68rem; padding:.3em .7em;">
-                                        <i class="bi bi-arrow-down-short"></i> Masuk
-                                    </span>
+                                    <span class="badge badge-soft-success badge-pill"><i class="bi bi-arrow-down-short"></i> Masuk</span>
                                 @else
-                                    <span class="badge rounded-pill" style="background:rgba(239,68,68,0.1); color:#ef4444; font-size:.68rem; padding:.3em .7em;">
-                                        <i class="bi bi-arrow-up-short"></i> Keluar
-                                    </span>
+                                    <span class="badge badge-soft-danger badge-pill"><i class="bi bi-arrow-up-short"></i> Keluar</span>
                                 @endif
                             </td>
-                            <td class="py-2 fw-semibold text-dark" style="max-width:200px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">{{ $tx['description'] }}</td>
-                            <td class="py-2 text-end fw-bold" style="color:{{ $tx['type'] === 'Pemasukan' ? '#10b981' : '#ef4444' }};">
+                            <td class="fw-600 text-dark" style="max-width:200px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">{{ $tx['description'] }}</td>
+                            <td class="col-amount {{ $tx['type'] === 'Pemasukan' ? 'text-success' : 'text-danger' }}">
                                 {{ $tx['type'] === 'Pemasukan' ? '+' : '-' }}Rp {{ number_format($tx['amount'], 0, ',', '.') }}
                             </td>
-                            <td class="py-2 text-center">
-                                <a href="{{ $tx['route'] }}" class="btn btn-sm btn-light border" style="font-size:.68rem; padding:.2rem .6rem;">Detail</a>
+                            <td class="text-center">
+                                <a href="{{ $tx['route'] }}" class="btn btn-sm btn-outline-secondary">Detail</a>
                             </td>
                         </tr>
                         @empty
                         <tr>
-                            <td colspan="5" class="text-center text-muted py-4" style="font-size:.85rem;">
-                                <i class="bi bi-inbox d-block fs-3 mb-1 opacity-30"></i>Belum ada transaksi dalam periode ini.
+                            <td colspan="5">
+                                <div class="empty-state py-4">
+                                    <i class="bi bi-inbox empty-state-icon" style="font-size:2rem;"></i>
+                                    <p class="empty-state-text mb-0">Belum ada transaksi dalam periode ini.</p>
+                                </div>
                             </td>
                         </tr>
                         @endforelse
@@ -284,8 +289,8 @@
 
     <div class="col-lg-4">
         <div class="card-premium p-4 h-100 d-flex flex-column">
-            <h6 class="fw-bold mb-1"><i class="bi bi-exclamation-triangle-fill text-warning me-1"></i> Tunggakan Terbesar</h6>
-            <p class="text-muted mb-4" style="font-size:.75rem;">Top 5 siswa dengan tagihan tertinggi saat ini</p>
+            <h6 class="fw-700 mb-1"><i class="bi bi-exclamation-triangle-fill text-warning me-1"></i> Tunggakan Terbesar</h6>
+            <p class="text-meta mb-4">Top 5 siswa dengan tagihan tertinggi saat ini</p>
 
             <div class="d-flex flex-column gap-3 flex-grow-1">
                 @forelse($attentionList as $i => $att)
@@ -293,22 +298,22 @@
                 <div>
                     <div class="d-flex justify-content-between align-items-center mb-1">
                         <div>
-                            <span class="fw-semibold text-dark" style="font-size:.83rem;">{{ $att['name'] }}</span>
-                            <span class="text-muted d-block" style="font-size:.68rem;">{{ $att['group_name'] }}</span>
+                            <span class="fw-600 text-dark" style="font-size: var(--text-sm);">{{ $att['name'] }}</span>
+                            <span class="text-meta d-block">{{ $att['group_name'] }}</span>
                         </div>
                         <div class="text-end">
-                            <span class="fw-bold text-danger" style="font-size:.8rem;">Rp {{ number_format($att['amount'], 0, ',', '.') }}</span>
-                            <a href="{{ route('payments.create', ['student_id' => $att['student_id']]) }}" class="btn btn-xs d-block mt-1" style="background:rgba(16,185,129,0.1); color:#10b981; font-size:.65rem; padding:.15rem .5rem; border-radius:4px; border:none;">Bayar Sekarang →</a>
+                            <span class="fw-700 text-danger tabular-nums" style="font-size: var(--text-xs);">Rp {{ number_format($att['amount'], 0, ',', '.') }}</span>
+                            <a href="{{ route('payments.create', ['student_id' => $att['student_id']]) }}" class="btn btn-sm badge-soft-success d-block mt-1 border-0" style="font-size: var(--text-2xs); padding: 2px 8px;">Bayar →</a>
                         </div>
                     </div>
-                    <div class="progress" style="height:4px; background:rgba(239,68,68,0.1);">
-                        <div class="progress-bar" style="width:{{ $pct }}%; background:#ef4444;"></div>
+                    <div class="progress" style="height:3px; background: var(--color-danger-bg);">
+                        <div class="progress-bar" style="width:{{ $pct }}%; background: var(--color-danger-text);"></div>
                     </div>
                 </div>
                 @empty
-                <div class="text-center py-4 my-auto">
-                    <i class="bi bi-emoji-smile fs-2 d-block text-success mb-2 opacity-50"></i>
-                    <p class="text-muted mb-0" style="font-size:.85rem;">Semua siswa tertib membayar! 🎉</p>
+                <div class="empty-state py-4 my-auto">
+                    <i class="bi bi-emoji-smile empty-state-icon text-success" style="font-size:2rem;"></i>
+                    <p class="empty-state-text mb-0">Semua siswa tertib membayar! 🎉</p>
                 </div>
                 @endforelse
             </div>

@@ -9,6 +9,7 @@ use App\Models\StudentEnrollment;
 use App\Models\PaymentTransaction;
 use App\Models\PaymentDetail;
 use App\Models\Expense;
+use App\Models\GeneralIncome;
 use App\Models\GlobalSppSetting;
 use PhpOffice\PhpSpreadsheet\Spreadsheet;
 use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
@@ -31,20 +32,37 @@ class ReportController extends Controller
         $startDate = $request->filled('start_date') ? $request->start_date : null;
         $endDate = $request->filled('end_date') ? $request->end_date : null;
 
-        // Fetch income (payment transactions)
-        $incomeQuery = PaymentTransaction::where('academic_year_id', $selectedYearId)->with('student');
+        // Fetch student income (payment transactions)
+        $studentIncomeQuery = PaymentTransaction::where('academic_year_id', $selectedYearId)->with('student');
         if ($startDate && $endDate) {
-            $incomeQuery->whereBetween('date', [$startDate, $endDate]);
+            $studentIncomeQuery->whereBetween('date', [$startDate, $endDate]);
         }
-        $incomes = $incomeQuery->get()->map(function ($item) {
-                return [
-                    'date' => $item->date,
-                    'type' => 'Pemasukan',
-                    'reference' => $item->receipt_number,
-                    'description' => "Pembayaran siswa: " . $item->student->name,
-                    'amount' => (float) $item->total_amount,
-                ];
-            });
+        $studentIncomes = $studentIncomeQuery->get()->map(function ($item) {
+            return [
+                'date' => $item->date,
+                'type' => 'Pemasukan Siswa',
+                'reference' => $item->receipt_number,
+                'description' => "Pembayaran siswa: " . $item->student->name,
+                'amount' => (float) $item->total_amount,
+            ];
+        });
+
+        // Fetch general income (other incomes)
+        $generalIncomeQuery = GeneralIncome::where('academic_year_id', $selectedYearId)->with('incomeCategory');
+        if ($startDate && $endDate) {
+            $generalIncomeQuery->whereBetween('date', [$startDate, $endDate]);
+        }
+        $generalIncomes = $generalIncomeQuery->get()->map(function ($item) {
+            return [
+                'date' => $item->date,
+                'type' => 'Pemasukan (Lainnya)',
+                'reference' => "INC-" . str_pad($item->id, 5, '0', STR_PAD_LEFT),
+                'description' => "[" . optional($item->incomeCategory)->name . "] " . $item->source . ($item->notes ? " - {$item->notes}" : ""),
+                'amount' => (float) $item->amount,
+            ];
+        });
+
+        $incomes = $studentIncomes->concat($generalIncomes);
 
         // Fetch expenses
         $outcomeQuery = Expense::where('academic_year_id', $selectedYearId)->with('expenseCategory');
@@ -52,14 +70,14 @@ class ReportController extends Controller
             $outcomeQuery->whereBetween('date', [$startDate, $endDate]);
         }
         $outcomes = $outcomeQuery->get()->map(function ($item) {
-                return [
-                    'date' => $item->date,
-                    'type' => 'Pengeluaran',
-                    'reference' => "EXP-" . str_pad($item->id, 5, '0', STR_PAD_LEFT),
-                    'description' => "[{$item->expenseCategory->name}] " . ($item->notes ?? 'Tanpa catatan'),
-                    'amount' => (float) $item->amount,
-                ];
-            });
+            return [
+                'date' => $item->date,
+                'type' => 'Pengeluaran',
+                'reference' => "EXP-" . str_pad($item->id, 5, '0', STR_PAD_LEFT),
+                'description' => "[" . optional($item->expenseCategory)->name . "] " . ($item->notes ?? 'Tanpa catatan'),
+                'amount' => (float) $item->amount,
+            ];
+        });
 
         // Combine and sort by date
         $ledger = $incomes->concat($outcomes)->sortBy('date')->values();

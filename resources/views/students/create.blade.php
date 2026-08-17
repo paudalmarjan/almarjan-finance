@@ -3,14 +3,16 @@
 @section('title', 'Tambah Siswa Baru')
 
 @section('content')
-<div class="d-flex justify-content-between align-items-center mb-4">
+<div class="page-header">
     <div>
-        <h5 class="mb-1 font-weight-600">Registrasi Siswa Baru</h5>
+        <h5 class="page-header-title">Registrasi Siswa Baru</h5>
         <div class="ay-badge">
             <i class="bi bi-calendar3"></i> Pendaftaran untuk TA: {{ $selectedYear->name }}
         </div>
     </div>
-    <a href="{{ route('students.index') }}" class="btn btn-light btn-sm"><i class="bi bi-arrow-left"></i> Kembali</a>
+    <div class="page-header-actions">
+        <a href="{{ route('students.index') }}" class="btn btn-light btn-sm"><i class="bi bi-arrow-left"></i> Kembali</a>
+    </div>
 </div>
 
 <div class="row justify-content-center">

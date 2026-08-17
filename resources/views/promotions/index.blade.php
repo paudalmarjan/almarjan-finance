@@ -3,15 +3,15 @@
 @section('title', 'Kenaikan Kelas & Kelulusan')
 
 @section('content')
-<div class="d-flex flex-wrap justify-content-between align-items-center mb-4 gap-2">
+<div class="page-header">
     <div>
-        <h5 class="mb-1 font-weight-600">Transisi Tahun Ajaran Baru</h5>
+        <h5 class="page-header-title">Transisi Tahun Ajaran Baru</h5>
         <p class="helper-text mb-0">Kelola kenaikan kelas dan kelulusan siswa secara massal di akhir tahun ajaran.</p>
     </div>
 </div>
 
 <!-- Selection Filter Card -->
-<div class="card-premium p-4 mb-4">
+<div class="filter-card">
     <h6 class="font-weight-600 mb-3 text-teal"><i class="bi bi-funnel"></i> Langkah 1: Pilih Kelas Asal & Tahun Ajaran Tujuan</h6>
     <form method="GET" action="{{ route('promotions.index') }}" class="row g-3 align-items-end">
         <div class="col-md-4">
@@ -94,8 +94,8 @@
                     <input type="hidden" name="target_academic_year_id" value="{{ $targetYear->id }}">
 
                     <div class="table-responsive" style="max-height: 500px; overflow-y: auto;">
-                        <table class="table table-hover align-middle">
-                            <thead class="table-light sticky-top">
+                        <table class="table table-clean">
+                            <thead class="sticky-top">
                                 <tr>
                                     <th>NIS</th>
                                     <th>Nama Siswa</th>

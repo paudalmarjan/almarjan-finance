@@ -12,6 +12,7 @@ use App\Models\AnnualFeeComponent;
 use App\Models\GlobalSppSetting;
 use App\Models\User;
 use App\Models\ExpenseCategory;
+use App\Models\IncomeCategory;
 
 class SettingController extends Controller
 {
@@ -31,6 +32,7 @@ class SettingController extends Controller
         $levels = Level::with('groups')->get();
         $discountCategories = DiscountCategory::orderBy('name')->get();
         $expenseCategories = ExpenseCategory::orderBy('name')->get();
+        $incomeCategories = IncomeCategory::orderBy('name')->get();
         $users = User::orderBy('name')->get();
 
         // Get context of the current global selected academic year
@@ -54,6 +56,7 @@ class SettingController extends Controller
             'levels',
             'discountCategories',
             'expenseCategories',
+            'incomeCategories',
             'users',
             'selectedYear',
             'feeComponents',
@@ -399,5 +402,30 @@ class SettingController extends Controller
 
         $category->delete();
         return redirect()->route('settings.index')->with('success', 'Kategori pengeluaran berhasil dihapus.');
+    }
+
+    public function storeIncomeCategory(Request $request)
+    {
+        $request->validate([
+            'name' => 'required|string|max:100|unique:income_categories,name',
+            'description' => 'nullable|string|max:255',
+        ]);
+
+        IncomeCategory::create([
+            'name' => $request->name,
+            'description' => $request->description,
+        ]);
+
+        return redirect()->route('settings.index')->with('success', 'Kategori pemasukan baru berhasil ditambahkan.');
+    }
+
+    public function destroyIncomeCategory(IncomeCategory $category)
+    {
+        if ($category->generalIncomes()->exists()) {
+            return redirect()->route('settings.index')->with('error', 'Kategori tidak bisa dihapus karena sudah memiliki data pemasukan terikat.');
+        }
+
+        $category->delete();
+        return redirect()->route('settings.index')->with('success', 'Kategori pemasukan berhasil dihapus.');
     }
 }
