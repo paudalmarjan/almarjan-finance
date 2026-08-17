@@ -95,5 +95,13 @@ class DatabaseSeeder extends Seeder
         ExpenseCategory::create(['name' => 'Gaji Guru & Staf']);
         ExpenseCategory::create(['name' => 'Perbaikan & Pemeliharaan Gedung']);
         ExpenseCategory::create(['name' => 'Lain-lain']);
+
+        // 9. Income Categories
+        \App\Models\IncomeCategory::create(['name' => 'Dana BOP PAUD', 'description' => 'Bantuan Operasional Penyelenggaraan dari Pemerintah']);
+        \App\Models\IncomeCategory::create(['name' => 'Donasi / Infaq', 'description' => 'Donasi dan infaq dari donatur/yayasan/orang tua']);
+        \App\Models\IncomeCategory::create(['name' => 'Penjualan Formulir', 'description' => 'Pemasukan dari biaya formulir pendaftaran siswa baru']);
+        \App\Models\IncomeCategory::create(['name' => 'Bunga Bank / Bagi Hasil', 'description' => 'Pendapatan jasa giro / bunga bank']);
+        \App\Models\IncomeCategory::create(['name' => 'Sponsor / Sewa', 'description' => 'Pendapatan dari sponsor atau penyewaan fasilitas']);
+        \App\Models\IncomeCategory::create(['name' => 'Lain-lain', 'description' => 'Pemasukan non-siswa lainnya']);
     }
 }

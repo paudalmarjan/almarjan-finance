@@ -33,7 +33,7 @@
                     <span class="ms-1 d-none d-sm-inline">Beranda</span>
                 </a>
                 
-                <div class="sidebar-section-title d-none d-sm-block">Penerimaan</div>
+                <div class="sidebar-section-title d-none d-sm-block">Penerimaan Siswa</div>
                 
                 <a href="{{ route('payments.create') }}" class="nav-link {{ request()->routeIs('payments.create') ? 'active' : '' }}">
                     <i class="bi bi-cash-coin"></i>
@@ -42,6 +42,17 @@
                 <a href="{{ route('payments.index') }}" class="nav-link {{ request()->routeIs('payments.index') && !request()->routeIs('payments.create') ? 'active' : '' }}">
                     <i class="bi bi-receipt"></i>
                     <span class="ms-1 d-none d-sm-inline">Riwayat Transaksi</span>
+                </a>
+
+                <div class="sidebar-section-title d-none d-sm-block">Pemasukan Lainnya</div>
+                
+                <a href="{{ route('incomes.create') }}" class="nav-link {{ request()->routeIs('incomes.create') ? 'active' : '' }}">
+                    <i class="bi bi-journal-plus"></i>
+                    <span class="ms-1 d-none d-sm-inline">Catat Pemasukan</span>
+                </a>
+                <a href="{{ route('incomes.index') }}" class="nav-link {{ request()->routeIs('incomes.index') && !request()->routeIs('incomes.create') ? 'active' : '' }}">
+                    <i class="bi bi-wallet2"></i>
+                    <span class="ms-1 d-none d-sm-inline">Riwayat Pemasukan</span>
                 </a>
 
                 <div class="sidebar-section-title d-none d-sm-block">Pengeluaran</div>

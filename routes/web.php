@@ -48,6 +48,12 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::post('/expenses', [ExpenseController::class, 'store'])->name('expenses.store');
     Route::delete('/expenses/{expense}', [ExpenseController::class, 'destroy'])->name('expenses.destroy');
 
+    // General Incomes (Pemasukan Lain-lain)
+    Route::get('/incomes', [GeneralIncomeController::class, 'index'])->name('incomes.index');
+    Route::get('/incomes/create', [GeneralIncomeController::class, 'create'])->name('incomes.create');
+    Route::post('/incomes', [GeneralIncomeController::class, 'store'])->name('incomes.store');
+    Route::delete('/incomes/{income}', [GeneralIncomeController::class, 'destroy'])->name('incomes.destroy');
+
     // Students (Daftar Siswa)
     Route::get('/students/search-ajax', [StudentController::class, 'searchAjax'])->name('students.search-ajax');
     Route::get('/students', [StudentController::class, 'index'])->name('students.index');
@@ -111,6 +117,9 @@ Route::middleware(['auth', 'verified'])->group(function () {
         
         Route::post('/settings/expense-categories', [SettingController::class, 'storeExpenseCategory'])->name('settings.expense-categories.store');
         Route::delete('/settings/expense-categories/{category}', [SettingController::class, 'destroyExpenseCategory'])->name('settings.expense-categories.destroy');
+        
+        Route::post('/settings/income-categories', [SettingController::class, 'storeIncomeCategory'])->name('settings.income-categories.store');
+        Route::delete('/settings/income-categories/{category}', [SettingController::class, 'destroyIncomeCategory'])->name('settings.income-categories.destroy');
         
         Route::post('/settings/users', [SettingController::class, 'storeUser'])->name('settings.users.store');
         Route::delete('/settings/users/{user}', [SettingController::class, 'destroyUser'])->name('settings.users.destroy');

@@ -23,6 +23,9 @@
                 <button class="nav-link text-start" id="tab-expense-categories-nav" data-bs-toggle="pill" data-bs-target="#tab-expense-categories" type="button" role="tab">
                     <i class="bi bi-tags me-2"></i> Kategori Pengeluaran
                 </button>
+                <button class="nav-link text-start" id="tab-income-categories-nav" data-bs-toggle="pill" data-bs-target="#tab-income-categories" type="button" role="tab">
+                    <i class="bi bi-wallet2 me-2"></i> Kategori Pemasukan
+                </button>
                 <button class="nav-link text-start" id="tab-users-nav" data-bs-toggle="pill" data-bs-target="#tab-users" type="button" role="tab">
                     <i class="bi bi-people me-2"></i> Pengguna Sistem
                 </button>
@@ -372,6 +375,52 @@
                 </div>
             </div>
 
+            <!-- Tab: Kategori Pemasukan -->
+            <div class="tab-pane fade" id="tab-income-categories" role="tabpanel">
+                <div class="card-premium p-4 mb-4">
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <h5 class="mb-0 font-weight-600"><i class="bi bi-wallet2 text-success me-2"></i> Kategori Pemasukan Non-Siswa</h5>
+                        <button type="button" class="btn btn-success btn-sm px-3" style="background-color: #059669; border-color: #059669;" data-bs-toggle="modal" data-bs-target="#addIncomeCatModal">
+                            <i class="bi bi-plus-lg"></i> Tambah Kategori
+                        </button>
+                    </div>
+                    <p class="helper-text mb-4">Mendukung pengelompokan pemasukan kas sekolah (Dana BOP PAUD, Donasi, Penjualan Formulir, dll) untuk laporan keuangan.</p>
+
+                    <div class="table-responsive">
+                        <table class="table table-hover align-middle">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>Kategori Pemasukan</th>
+                                    <th>Deskripsi / Keterangan</th>
+                                    <th class="text-end">Aksi</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @forelse($incomeCategories as $ic)
+                                <tr>
+                                    <td class="font-weight-600 text-dark">{{ $ic->name }}</td>
+                                    <td><span class="text-muted small">{{ $ic->description ?? '-' }}</span></td>
+                                    <td class="text-end">
+                                        <form action="{{ route('settings.income-categories.destroy', $ic->id) }}" method="POST" class="d-inline" onsubmit="return confirm('Hapus kategori pemasukan ini?')">
+                                            @csrf
+                                            @method('DELETE')
+                                            <button type="submit" class="btn btn-sm btn-outline-danger">
+                                                <i class="bi bi-trash"></i>
+                                            </button>
+                                        </form>
+                                    </td>
+                                </tr>
+                                @empty
+                                <tr>
+                                    <td colspan="3" class="text-center py-3 text-muted">Belum ada kategori pemasukan terdaftar.</td>
+                                </tr>
+                                @endforelse
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
             <!-- Tab 5: Pengguna Sistem -->
             <div class="tab-pane fade" id="tab-users" role="tabpanel">
                 <div class="card-premium p-4 mb-4">
@@ -628,6 +677,35 @@
                 <div class="modal-footer border-0">
                     <button type="button" class="btn btn-light" data-bs-dismiss="modal">Batal</button>
                     <button type="submit" class="btn btn-primary-custom">Simpan Kategori</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Modal: Add Income Category -->
+<div class="modal fade" id="addIncomeCatModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content card-premium">
+            <div class="modal-header border-0">
+                <h5 class="modal-title font-weight-600">Tambah Kategori Pemasukan</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <form action="{{ route('settings.income-categories.store') }}" method="POST">
+                @csrf
+                <div class="modal-body border-0">
+                    <div class="mb-3">
+                        <label for="inc_cat_name" class="form-label small font-weight-500">Nama Kategori Pemasukan</label>
+                        <input type="text" class="form-control" name="name" id="inc_cat_name" placeholder="Misal: Dana BOP PAUD, Donasi Yayasan" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="inc_cat_desc" class="form-label small font-weight-500">Deskripsi / Keterangan (Opsional)</label>
+                        <input type="text" class="form-control" name="description" id="inc_cat_desc" placeholder="Rincian peruntukan atau penjelasan singkat">
+                    </div>
+                </div>
+                <div class="modal-footer border-0">
+                    <button type="button" class="btn btn-light" data-bs-dismiss="modal">Batal</button>
+                    <button type="submit" class="btn btn-success" style="background-color: #059669; border-color: #059669;">Simpan Kategori</button>
                 </div>
             </form>
         </div>

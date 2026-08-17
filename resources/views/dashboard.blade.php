@@ -22,6 +22,9 @@
         <a href="{{ route('reports.arrears') }}" class="btn btn-sm btn-outline-warning" style="font-size:.75rem;">
             <i class="bi bi-exclamation-triangle me-1"></i>Lap. Tunggakan
         </a>
+        <a href="{{ route('incomes.create') }}" class="btn btn-sm btn-outline-success" style="font-size:.75rem;">
+            <i class="bi bi-journal-plus me-1"></i>Pemasukan Lain
+        </a>
         <a href="{{ route('payments.create') }}" class="btn btn-sm btn-success" style="font-size:.75rem;">
             <i class="bi bi-plus-lg me-1"></i>Catat Pembayaran
         </a>
@@ -64,7 +67,10 @@
             <div>
                 <p class="text-muted mb-1" style="font-size:.72rem; font-weight:700; text-transform:uppercase; letter-spacing:.05em;">Total Pemasukan</p>
                 <h4 class="mb-0 fw-bold text-success" style="font-size:1.2rem;">Rp {{ number_format($totalIncome, 0, ',', '.') }}</h4>
-                <small class="text-muted" style="font-size:.68rem;">Bulan ini: Rp {{ number_format($thisMonthIncome, 0, ',', '.') }}</small>
+                <div class="mt-1 d-flex flex-column gap-0" style="font-size:.68rem;">
+                    <span class="text-muted">Siswa: Rp {{ number_format($totalStudentIncome, 0, ',', '.') }} | Non-Siswa: Rp {{ number_format($totalGeneralIncome, 0, ',', '.') }}</span>
+                    <span class="text-muted">Bulan ini: Rp {{ number_format($thisMonthIncome, 0, ',', '.') }}</span>
+                </div>
             </div>
         </div>
     </div>

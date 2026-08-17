@@ -81,15 +81,15 @@
                     <td>{{ $item['date']->format('d M Y') }}</td>
                     <td class="font-weight-600 text-muted">{{ $item['reference'] }}</td>
                     <td>
-                        @if($item['type'] === 'Pemasukan')
-                            <span class="badge bg-success-subtle text-success border border-success-subtle px-2">Masuk</span>
+                        @if(str_contains($item['type'], 'Pemasukan'))
+                            <span class="badge bg-success text-white border border-success px-2" style="background-color: #059669 !important;">{{ $item['type'] }}</span>
                         @else
-                            <span class="badge bg-danger-subtle text-danger border border-danger-subtle px-2">Keluar</span>
+                            <span class="badge bg-danger text-white border border-danger px-2">Pengeluaran</span>
                         @endif
                     </td>
                     <td>{{ $item['description'] }}</td>
-                    <td class="text-end font-weight-600 {{ $item['type'] === 'Pemasukan' ? 'text-success' : 'text-danger' }}">
-                        {{ $item['type'] === 'Pemasukan' ? '+' : '-' }} Rp {{ number_format($item['amount'], 0, ',', '.') }}
+                    <td class="text-end font-weight-600 {{ str_contains($item['type'], 'Pemasukan') ? 'text-success' : 'text-danger' }}">
+                        {{ str_contains($item['type'], 'Pemasukan') ? '+' : '-' }} Rp {{ number_format($item['amount'], 0, ',', '.') }}
                     </td>
                 </tr>
                 @empty
