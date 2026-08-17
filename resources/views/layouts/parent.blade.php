@@ -85,8 +85,8 @@
             @if(session()->has('parent_student_id') && !request()->routeIs('wali.login'))
             <form action="{{ route('wali.logout') }}" method="POST" class="position-absolute top-0 end-0 p-3">
                 @csrf
-                <button type="submit" class="btn btn-sm btn-light rounded-circle" style="width: 32px; height: 32px; padding: 0;" title="Keluar">
-                    <i class="bi bi-box-arrow-right text-danger"></i>
+                <button type="submit" class="btn btn-sm text-white border-0" style="background: transparent; font-size: 1.5rem; padding: 0;" title="Keluar">
+                    <i class="bi bi-box-arrow-right"></i>
                 </button>
             </form>
             @endif
