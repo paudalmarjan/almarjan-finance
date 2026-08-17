@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Hash;
 use App\Models\Student;
 use App\Models\StudentEnrollment;
 use App\Models\AcademicYear;
@@ -199,6 +200,7 @@ class StudentController extends Controller
                 'parent_name' => $request->parent_name,
                 'phone_number' => $request->phone_number,
                 'status' => 'Active',
+                'pin' => Hash::make('123456'),
             ]);
 
             // Auto generate NIS
@@ -580,6 +582,7 @@ class StudentController extends Controller
                         'parent_name' => $sData['parent_name'],
                         'phone_number' => $sData['phone_number'],
                         'status' => 'Active',
+                        'pin' => Hash::make('123456'),
                     ]);
                     
                     // Generate NIS automatically
@@ -659,5 +662,18 @@ class StudentController extends Controller
         });
 
         return redirect()->route('students.index')->with('success', 'Pendaftaran siswa untuk Tahun Ajaran ' . $academicYear->name . ' berhasil dibatalkan.');
+    }
+
+    public function resetPin(Student $student)
+    {
+        if (auth()->user()->role !== 'admin') {
+            abort(403, 'Akses Ditolak: Hanya Administrator yang dapat mereset PIN wali murid.');
+        }
+
+        $student->update([
+            'pin' => Hash::make('123456')
+        ]);
+
+        return redirect()->back()->with('success', 'PIN Wali Murid untuk ' . $student->name . ' berhasil direset ke standar (123456).');
     }
 }

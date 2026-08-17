@@ -111,7 +111,7 @@ class DashboardController extends Controller
                 $attentionList[] = [
                     'student_id'   => $enr->student_id,
                     'name'         => $enr->student->name,
-                    'group'        => optional($enr->studentGroup)->name ?? '-',
+                    'group_name'   => optional($enr->studentGroup)->name ?? '-',
                     'amount'       => $studentArrears,
                     'annual_amount' => $annualArrears,
                     'spp_amount'   => $sppArrears,

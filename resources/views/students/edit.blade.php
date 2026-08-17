@@ -3,14 +3,16 @@
 @section('title', 'Detail & Edit Siswa')
 
 @section('content')
-<div class="d-flex justify-content-between align-items-center mb-4">
+<div class="page-header">
     <div>
-        <h5 class="mb-1 font-weight-600">Detail & Sunting Siswa</h5>
+        <h5 class="page-header-title">Detail & Sunting Siswa</h5>
         <div class="ay-badge">
             <i class="bi bi-calendar3"></i> Tahun Ajaran: {{ $enrollment->academicYear->name }}
         </div>
     </div>
-    <a href="{{ route('students.index') }}" class="btn btn-light btn-sm"><i class="bi bi-arrow-left"></i> Kembali</a>
+    <div class="page-header-actions">
+        <a href="{{ route('students.index') }}" class="btn btn-light btn-sm"><i class="bi bi-arrow-left"></i> Kembali</a>
+    </div>
 </div>
 
 <form action="{{ route('students.update', $student->id) }}" method="POST">
@@ -109,7 +111,7 @@
                         <label for="discount_category_id" class="form-label small font-weight-500">
                             Kategori Diskon
                             @if($enrollment->discountCategory)
-                                <span class="badge bg-secondary text-white ms-1" style="font-size: 0.7rem;">Aktif: {{ (int)$enrollment->discount_percentage }}%</span>
+                                <span class="badge badge-soft-neutral ms-1">Aktif: {{ (int)$enrollment->discount_percentage }}%</span>
                             @endif
                         </label>
                         <select class="form-select @error('discount_category_id') is-invalid @enderror" name="discount_category_id" id="discount_category_id">
@@ -149,8 +151,8 @@
                 <p class="helper-text mb-3">Centang komponen di bawah ini untuk **mengeluarkan/mengecualikan** siswa dari kewajiban pembayaran tersebut (misal: jika orang tua sudah membeli seragam sendiri di luar sekolah).</p>
                 
                 <div class="table-responsive flex-grow-1">
-                    <table class="table table-hover align-middle">
-                        <thead class="table-light">
+                    <table class="table table-clean">
+                        <thead>
                             <tr>
                                 <th style="width: 50px;" class="text-center">Kecualikan</th>
                                 <th>Nama Komponen</th>
@@ -173,7 +175,7 @@
                                 <td class="text-end">
                                     @if($fee->is_excluded)
                                         <span class="text-muted text-decoration-line-through">Rp {{ number_format($fee->annualFeeComponent->amount * (1 - ($enrollment->discount_percentage / 100)), 0, ',', '.') }}</span>
-                                        <span class="badge bg-danger ms-2">Dikecualikan (Rp 0)</span>
+                                        <span class="badge badge-soft-danger ms-2">Dikecualikan (Rp 0)</span>
                                     @else
                                         Rp {{ number_format($fee->amount, 0, ',', '.') }}
                                     @endif
@@ -191,8 +193,13 @@
     <div class="card-premium p-3 d-flex justify-content-between align-items-center mb-4">
         <div>
             @if($canCancelEnrollment)
-                <button type="button" class="btn btn-outline-danger px-4 py-2" onclick="confirmCancelEnrollment()">
+                <button type="button" class="btn btn-outline-danger px-4 py-2 me-2" onclick="confirmCancelEnrollment()">
                     <i class="bi bi-trash-fill me-1"></i> Batalkan Pendaftaran TA {{ $enrollment->academicYear->name }}
+                </button>
+            @endif
+            @if(auth()->user()->role === 'admin')
+                <button type="button" class="btn btn-outline-warning px-4 py-2" onclick="confirmResetPin()">
+                    <i class="bi bi-key-fill me-1"></i> Reset PIN Wali Murid
                 </button>
             @endif
         </div>
@@ -212,6 +219,20 @@
     function confirmCancelEnrollment() {
         if (confirm("Apakah Anda yakin ingin membatalkan pendaftaran siswa ini untuk Tahun Ajaran {{ $enrollment->academicYear->name }}?\n\nTindakan ini akan menghapus data pendaftaran dan tagihan tahunan siswa untuk tahun ajaran ini. Data diri dasar siswa tidak akan terhapus.")) {
             document.getElementById('cancel-enrollment-form').submit();
+        }
+    }
+</script>
+@endif
+
+@if(auth()->user()->role === 'admin')
+<form id="reset-pin-form" action="{{ route('students.reset-pin', $student->id) }}" method="POST" class="d-none">
+    @csrf
+</form>
+
+<script>
+    function confirmResetPin() {
+        if (confirm("Apakah Anda yakin ingin mereset PIN Portal Wali Murid untuk siswa ini?\n\nPIN akan dikembalikan ke standar (123456).")) {
+            document.getElementById('reset-pin-form').submit();
         }
     }
 </script>

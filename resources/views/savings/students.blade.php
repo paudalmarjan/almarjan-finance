@@ -3,7 +3,7 @@
 @section('title', 'Tabungan Siswa')
 
 @section('content')
-<div class="card-premium p-3 mb-4">
+<div class="filter-card">
     <form method="GET" action="{{ route('savings.students') }}" class="row g-2 align-items-end">
         <div class="col-md-3">
             <label for="filter_level_id" class="form-label small font-weight-600 text-muted mb-1">Filter Jenjang</label>
@@ -51,8 +51,8 @@
     </div>
 
     <div class="table-responsive">
-        <table class="table table-hover align-middle">
-            <thead class="table-light">
+        <table class="table table-clean">
+            <thead>
                 <tr>
                     <th>NIS</th>
                     <th>Nama Lengkap</th>
@@ -69,7 +69,7 @@
                     $balance = $student->savings ? $student->savings->balance : 0;
                 @endphp
                 <tr>
-                    <td><span class="badge bg-light text-dark border">{{ $student->nis }}</span></td>
+                    <td><span class="badge badge-soft-neutral">{{ $student->nis }}</span></td>
                     <td class="font-weight-600">
                         {{ $student->name }}
                         @if($student->nickname)
@@ -77,7 +77,7 @@
                         @endif
                     </td>
                     <td>{{ $groupName }}</td>
-                    <td class="text-end font-weight-600 {{ $balance > 0 ? 'text-success' : '' }}">
+                    <td class="text-end font-weight-600 col-amount {{ $balance > 0 ? 'text-success' : '' }}">
                         Rp {{ number_format($balance, 0, ',', '.') }}
                     </td>
                     <td class="text-center">
@@ -88,9 +88,12 @@
                 </tr>
                 @empty
                 <tr>
-                    <td colspan="5" class="text-center py-4 text-muted">
-                        <i class="bi bi-inbox fs-2 d-block mb-2"></i>
-                        Belum ada data siswa aktif yang ditemukan.
+                    <td colspan="5">
+                        <div class="empty-state">
+                            <i class="bi bi-inbox empty-state-icon"></i>
+                            <p class="empty-state-title">Tidak Ada Data</p>
+                            <p class="empty-state-text mb-0">Belum ada data siswa aktif yang ditemukan.</p>
+                        </div>
                     </td>
                 </tr>
                 @endforelse

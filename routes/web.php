@@ -12,6 +12,9 @@ use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Artisan;
 
 use App\Http\Controllers\PortalController;
+use App\Http\Controllers\GeneralIncomeController;
+use App\Http\Controllers\ParentAuthController;
+use App\Http\Controllers\ParentPortalController;
 
 // Redirect / to portal
 Route::redirect('/', '/portal');
@@ -19,6 +22,20 @@ Route::redirect('/', '/portal');
 // Public ping route for uptime monitoring
 Route::get('/ping', function () {
     return 'pong';
+});
+
+// Parent Portal Routes
+Route::prefix('wali')->name('wali.')->group(function () {
+    Route::get('/login', [ParentAuthController::class, 'showLogin'])->name('login');
+    Route::post('/login', [ParentAuthController::class, 'login'])->name('login.post');
+    Route::post('/logout', [ParentAuthController::class, 'logout'])->name('logout');
+    
+    // Protected Parent Routes
+    Route::middleware([\App\Http\Middleware\ParentPortalMiddleware::class])->group(function () {
+        Route::get('/', [ParentPortalController::class, 'index'])->name('dashboard');
+        Route::get('/ganti-pin', [ParentPortalController::class, 'showChangePin'])->name('change-pin');
+        Route::post('/ganti-pin', [ParentPortalController::class, 'updatePin'])->name('change-pin.post');
+    });
 });
 
 // Auth protected routes
@@ -89,6 +106,9 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
         // Cancel Student Enrollment (Tahun Ajaran Inaktif)
         Route::delete('/students/{student}/cancel-enrollment', [StudentController::class, 'cancelEnrollment'])->name('students.cancel-enrollment');
+
+        // Reset Parent PIN (Hanya Admin)
+        Route::post('/students/{student}/reset-pin', [StudentController::class, 'resetPin'])->name('students.reset-pin');
 
         // Promotions (Kenaikan Kelas)
         Route::get('/promotions', [PromotionController::class, 'index'])->name('promotions.index');

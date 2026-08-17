@@ -3,15 +3,15 @@
 @section('title', 'Riwayat Transaksi')
 
 @section('content')
-<div class="d-flex flex-wrap justify-content-between align-items-center mb-4 gap-2">
+<div class="page-header">
     <div>
-        <h5 class="mb-1 font-weight-600">Penerimaan Kas (Masuk)</h5>
+        <h5 class="page-header-title">Penerimaan Kas (Masuk)</h5>
         <div class="ay-badge">
             <i class="bi bi-calendar3"></i> Tahun Ajaran: {{ $selectedYear ? $selectedYear->name : 'N/A' }}
         </div>
     </div>
     
-    <div>
+    <div class="page-header-actions">
         <a href="{{ route('payments.create') }}" class="btn btn-primary-custom btn-sm">
             <i class="bi bi-cash-coin me-1"></i> Catat Pembayaran Baru
         </a>
@@ -19,7 +19,7 @@
 </div>
 
 <!-- Filters Card -->
-<div class="card-premium p-3 mb-4">
+<div class="filter-card">
     <form method="GET" action="{{ route('payments.index') }}" class="row g-3 align-items-end">
         <div class="col-md-3">
             <label for="start_date" class="form-label small font-weight-500 text-muted">Dari Tanggal</label>
@@ -73,8 +73,8 @@
 <!-- Transaction History List -->
 <div class="card-premium p-4">
     <div class="table-responsive">
-        <table class="table table-hover align-middle">
-            <thead class="table-light">
+        <table class="table table-clean">
+            <thead>
                 <tr>
                     <th>No. Kuitansi</th>
                     <th>Tanggal</th>
@@ -91,7 +91,7 @@
                     <td>{{ $tx->date->format('d M Y') }}</td>
                     <td class="font-weight-600">{{ $tx->student->name }}</td>
                     <td>{{ $tx->user ? $tx->user->name : '-' }}</td>
-                    <td class="text-end font-weight-600 text-success">
+                    <td class="text-end font-weight-600 text-success col-amount">
                         Rp {{ number_format($tx->total_amount, 0, ',', '.') }}
                     </td>
                     <td class="text-end">
@@ -102,9 +102,12 @@
                 </tr>
                 @empty
                 <tr>
-                    <td colspan="6" class="text-center py-4 text-muted">
-                        <i class="bi bi-receipt fs-1 d-block mb-2 text-light"></i>
-                        Belum ada riwayat transaksi pembayaran tercatat untuk kriteria pencarian ini.
+                    <td colspan="6">
+                        <div class="empty-state">
+                            <i class="bi bi-receipt empty-state-icon"></i>
+                            <p class="empty-state-title">Tidak Ada Data</p>
+                            <p class="empty-state-text mb-0">Belum ada riwayat transaksi pembayaran tercatat untuk kriteria pencarian ini.</p>
+                        </div>
                     </td>
                 </tr>
                 @endforelse

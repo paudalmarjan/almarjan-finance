@@ -4,15 +4,15 @@
 
 @section('content')
 <!-- Actions Header -->
-<div class="d-flex flex-wrap justify-content-between align-items-center mb-4 gap-2">
+<div class="page-header">
     <div>
-        <h5 class="mb-1 font-weight-600">Manajemen Siswa</h5>
+        <h5 class="page-header-title">Manajemen Siswa</h5>
         <div class="ay-badge">
             <i class="bi bi-calendar3"></i> Tahun Ajaran: {{ $selectedYear ? $selectedYear->name : 'N/A' }}
         </div>
     </div>
     
-    <div class="d-flex gap-2">
+    <div class="page-header-actions">
         <button type="button" class="btn btn-outline-success btn-sm px-3" data-bs-toggle="modal" data-bs-target="#importExcelModal">
             <i class="bi bi-file-earmark-excel me-1"></i> Impor Excel
         </button>
@@ -38,7 +38,7 @@
 @endif
 
 <!-- Filters Card -->
-<div class="card-premium p-3 mb-4">
+<div class="filter-card">
     <form method="GET" action="{{ route('students.index') }}" class="row g-3 align-items-end">
         <div class="col-md-2">
             <label for="filter_level_id" class="form-label small font-weight-500 text-muted">Jenjang</label>
@@ -93,8 +93,8 @@
 <!-- Student List Card -->
 <div class="card-premium p-4">
     <div class="table-responsive">
-        <table class="table table-hover align-middle">
-            <thead class="table-light">
+        <table class="table table-clean">
+            <thead>
                 <tr>
                     <th>NIS</th>
                     <th>Nama Lengkap</th>
@@ -114,44 +114,44 @@
                     <td class="font-weight-600">
                         {{ $enr->student->name }}
                         @if($enr->student->nickname)
-                            <div class="small text-muted font-weight-500" style="font-size: 0.75rem;">({{ $enr->student->nickname }})</div>
+                            <div class="small text-muted font-weight-500">({{ $enr->student->nickname }})</div>
                         @endif
                     </td>
                     <td>{{ $enr->student->parent_name ?? '-' }}</td>
                     <td>{{ $enr->student->phone_number ?? '-' }}</td>
                     <td>
-                        <span class="badge bg-secondary">{{ $enr->studentGroup->name }}</span>
+                        <span class="badge badge-soft-neutral">{{ $enr->studentGroup->name }}</span>
                         <div class="mt-1">
                             @if($enr->enrollment_type === 'New')
-                                <span class="badge bg-primary" style="font-size: 0.7rem;">Baru</span>
+                                <span class="badge badge-soft-primary">Baru</span>
                             @else
-                                <span class="badge bg-dark" style="font-size: 0.7rem;">Lama</span>
+                                <span class="badge badge-soft-dark">Lama</span>
                             @endif
                         </div>
                     </td>
                     <td>
                         @if($enr->discountCategory)
-                            <span class="badge bg-info text-dark">{{ $enr->discountCategory->name }} ({{ (int)$enr->discount_percentage }}%)</span>
+                            <span class="badge badge-soft-info">{{ $enr->discountCategory->name }} ({{ (int)$enr->discount_percentage }}%)</span>
                         @else
                             <span class="text-muted small">-</span>
                         @endif
                     </td>
                     <td>
                         @if($enr->arrears_amount > 0)
-                            <span class="badge bg-danger">Rp {{ number_format($enr->arrears_amount, 0, ',', '.') }}</span>
+                            <span class="badge badge-soft-danger">Rp {{ number_format($enr->arrears_amount, 0, ',', '.') }}</span>
                         @else
-                            <span class="badge bg-success">Lunas</span>
+                            <span class="badge badge-soft-success">Lunas</span>
                         @endif
                     </td>
                     <td>
                         @if($enr->student->status === 'Active')
-                            <span class="badge bg-success">Aktif</span>
+                            <span class="badge badge-soft-success">Aktif</span>
                         @elseif($enr->student->status === 'Graduated')
-                            <span class="badge bg-dark">Lulus</span>
+                            <span class="badge badge-soft-dark">Lulus</span>
                         @elseif($enr->student->status === 'Not Continuing')
-                            <span class="badge bg-danger">Tidak Lanjut</span>
+                            <span class="badge badge-soft-danger">Tidak Lanjut</span>
                         @else
-                            <span class="badge bg-warning text-dark">Mutasi</span>
+                            <span class="badge badge-soft-warning">Mutasi</span>
                         @endif
                     </td>
                     <td class="text-end">
@@ -162,9 +162,12 @@
                 </tr>
                 @empty
                 <tr>
-                    <td colspan="9" class="text-center py-4 text-muted">
-                        <i class="bi bi-people fs-1 d-block mb-2 text-light"></i>
-                        Belum ada data siswa terdaftar untuk Tahun Ajaran ini.
+                    <td colspan="9">
+                        <div class="empty-state">
+                            <i class="bi bi-people empty-state-icon"></i>
+                            <p class="empty-state-title">Belum Ada Siswa</p>
+                            <p class="empty-state-text mb-0">Belum ada data siswa terdaftar untuk Tahun Ajaran ini.</p>
+                        </div>
                     </td>
                 </tr>
                 @endforelse

@@ -35,7 +35,7 @@
                 </div>
                 <div class="col-10">
                     <h5 class="mb-0 font-weight-700 text-teal">PAUD AL MARJAN</h5>
-                    <p class="helper-text mb-0" style="font-size: 0.75rem;">Permata Depok Regency Ratujaya</p>
+                    <p class="helper-text mb-0">Permata Depok Regency Ratujaya</p>
                     <span class="small font-weight-600 text-muted">KUITANSI PEMBAYARAN RESMI</span>
                 </div>
             </div>
@@ -101,12 +101,12 @@
                             </td>
                             <td>
                                 @if($det->type === 'Annual')
-                                    <span class="badge bg-secondary">Uang Tahunan</span>
+                                    <span class="badge badge-soft-neutral">Uang Tahunan</span>
                                 @else
-                                    <span class="badge bg-info text-dark">SPP Bulanan</span>
+                                    <span class="badge badge-soft-info">SPP Bulanan</span>
                                 @endif
                             </td>
-                            <td class="text-end font-weight-500 text-teal">
+                            <td class="text-end font-weight-500 text-teal col-amount">
                                 Rp {{ number_format($det->amount, 0, ',', '.') }}
                             </td>
                         </tr>
@@ -115,7 +115,7 @@
                     <tfoot>
                         <tr>
                             <td colspan="2" class="text-end font-weight-600 fs-6">TOTAL PEMBAYARAN:</td>
-                            <td class="text-end font-weight-700 text-success fs-5">
+                            <td class="text-end font-weight-700 text-success fs-5 col-amount">
                                 Rp {{ number_format($transaction->total_amount, 0, ',', '.') }}
                             </td>
                         </tr>

@@ -81,7 +81,7 @@
             <img src="{{ asset('images/logo.png') }}" alt="Logo" style="height: 36px;">
             <div class="lh-sm d-none d-sm-block">
                 <span class="d-block fw-bold fs-6 text-dark">PAUD HUB</span>
-                <span class="d-block text-muted" style="font-size: 0.65rem;">Central Application Portal</span>
+                <span class="d-block text-muted text-meta">Central Application Portal</span>
             </div>
         </div>
         

@@ -3,21 +3,21 @@
 @section('title', 'Riwayat Pengeluaran')
 
 @section('content')
-<div class="d-flex flex-wrap justify-content-between align-items-center mb-4 gap-2">
+<div class="page-header">
     <div>
-        <h5 class="mb-1 font-weight-600">Pengeluaran Kas (Keluar)</h5>
+        <h5 class="page-header-title">Pengeluaran Kas (Keluar)</h5>
         <p class="helper-text mb-0">Riwayat pengeluaran operasional dan belanja keperluan sekolah.</p>
     </div>
     
-    <div>
-        <a href="{{ route('expenses.create') }}" class="btn btn-danger btn-sm px-3" style="background-color: #ef4444; border-color: #ef4444;">
+    <div class="page-header-actions">
+        <a href="{{ route('expenses.create') }}" class="btn btn-danger-custom btn-sm px-3">
             <i class="bi bi-journal-arrow-down me-1"></i> Catat Pengeluaran Baru
         </a>
     </div>
 </div>
 
 <!-- Filters Card -->
-<div class="card-premium p-3 mb-4">
+<div class="filter-card">
     <form method="GET" action="{{ route('expenses.index') }}" class="row g-3 align-items-end">
         <div class="col-md-3">
             <label for="filter_category" class="form-label small font-weight-500 text-muted">Kategori</label>
@@ -49,8 +49,8 @@
 <!-- Expenses List Table -->
 <div class="card-premium p-4">
     <div class="table-responsive">
-        <table class="table table-hover align-middle">
-            <thead class="table-light">
+        <table class="table table-clean">
+            <thead>
                 <tr>
                     <th>Tanggal</th>
                     <th>Kategori Pengeluaran</th>
@@ -65,19 +65,19 @@
                 @forelse($expenses as $exp)
                 <tr>
                     <td>{{ $exp->date->format('d M Y') }}</td>
-                    <td><span class="badge bg-warning text-dark font-weight-500">{{ $exp->expenseCategory->name }}</span></td>
+                    <td><span class="badge badge-soft-warning font-weight-500">{{ $exp->expenseCategory->name }}</span></td>
                     <td>{{ $exp->notes ?? '-' }}</td>
                     <td>{{ $exp->user ? $exp->user->name : '-' }}</td>
                     <td class="text-center">
                         @if($exp->attachment_path)
-                            <a href="{{ $exp->attachment_url }}" target="_blank" class="btn btn-sm btn-outline-info p-1 px-2" style="font-size: 0.8rem;">
+                            <a href="{{ $exp->attachment_url }}" target="_blank" class="btn btn-sm btn-outline-info p-1 px-2">
                                 <i class="bi bi-file-earmark-image"></i> Lihat Bukti
                             </a>
                         @else
                             <span class="text-muted small">Tidak ada</span>
                         @endif
                     </td>
-                    <td class="text-end font-weight-600 text-danger">
+                    <td class="text-end font-weight-600 text-danger col-amount">
                         Rp {{ number_format($exp->amount, 0, ',', '.') }}
                     </td>
                     <td class="text-end">
@@ -92,9 +92,12 @@
                 </tr>
                 @empty
                 <tr>
-                    <td colspan="7" class="text-center py-4 text-muted">
-                        <i class="bi bi-journal-x fs-1 d-block mb-2 text-light"></i>
-                        Belum ada catatan transaksi pengeluaran untuk pencarian ini.
+                    <td colspan="7">
+                        <div class="empty-state">
+                            <i class="bi bi-journal-x empty-state-icon"></i>
+                            <p class="empty-state-title">Tidak Ada Data</p>
+                            <p class="empty-state-text mb-0">Belum ada catatan transaksi pengeluaran untuk pencarian ini.</p>
+                        </div>
                     </td>
                 </tr>
                 @endforelse

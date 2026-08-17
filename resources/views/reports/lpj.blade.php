@@ -3,9 +3,9 @@
 @section('title', 'Laporan Pertanggungjawaban (LPJ)')
 
 @section('content')
-<div class="d-flex flex-wrap justify-content-between align-items-center mb-4 gap-2">
+<div class="page-header">
     <div>
-        <h5 class="mb-1 font-weight-600">Penyusunan Berkas LPJ</h5>
+        <h5 class="page-header-title">Penyusunan Berkas LPJ</h5>
         <p class="helper-text mb-0">Hasilkan dokumen Laporan Pertanggungjawaban (LPJ) terpadu dalam format PDF yang melampirkan seluruh bukti transaksi.</p>
     </div>
 </div>
@@ -48,8 +48,8 @@
             </div>
 
             <div class="table-responsive" style="max-height: 350px; overflow-y: auto;">
-                <table class="table table-hover align-middle small">
-                    <thead class="table-light sticky-top">
+                <table class="table table-clean small">
+                    <thead class="sticky-top">
                         <tr>
                             <th>Tanggal</th>
                             <th>Kategori</th>
@@ -61,15 +61,21 @@
                         @forelse($expenses as $exp)
                         <tr>
                             <td>{{ $exp->date->format('d M') }}</td>
-                            <td><span class="badge bg-warning text-dark">{{ $exp->expenseCategory->name }}</span></td>
+                            <td><span class="badge badge-soft-warning">{{ $exp->expenseCategory->name }}</span></td>
                             <td>{{ Str::limit($exp->notes ?? 'Tanpa catatan', 40) }}</td>
-                            <td class="text-end text-danger font-weight-500">
+                            <td class="text-end text-danger font-weight-500 col-amount">
                                 Rp {{ number_format($exp->amount, 0, ',', '.') }}
                             </td>
                         </tr>
                         @empty
                         <tr>
-                            <td colspan="4" class="text-center py-4 text-muted">Belum ada pengeluaran kas dalam rentang tanggal tersebut.</td>
+                            <td colspan="4">
+                                <div class="empty-state">
+                                    <i class="bi bi-journal-text empty-state-icon"></i>
+                                    <p class="empty-state-title">Tidak Ada Data</p>
+                                    <p class="empty-state-text mb-0">Belum ada pengeluaran kas dalam rentang tanggal tersebut.</p>
+                                </div>
+                            </td>
                         </tr>
                         @endforelse
                     </tbody>
